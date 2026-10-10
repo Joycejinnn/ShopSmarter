@@ -11,7 +11,7 @@ export const RequirementsBreakdown: React.FC<RequirementsBreakdownProps> = ({
   requirements,
   plan
 }) => {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   if (requirements.length === 0) return null;
 
@@ -21,14 +21,14 @@ export const RequirementsBreakdown: React.FC<RequirementsBreakdownProps> = ({
 
   return (
     <div className="bg-brand-card rounded-2xl border border-brand-border shadow-card overflow-hidden">
-      <div
+      <button type="button" aria-expanded={isExpanded}
         onClick={() => setIsExpanded(!isExpanded)}
-        className="p-4 flex items-center justify-between cursor-pointer hover:bg-brand-canvas/50 transition-colors select-none"
+        className="w-full text-left p-4 flex items-center justify-between cursor-pointer hover:bg-brand-canvas/50 transition-colors select-none"
       >
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <ListFilter className="w-4 h-4 text-brand-primary" />
           <h3 className="text-xs font-bold uppercase tracking-wider text-brand-darkgreen">
-            Ingredient Shortfalls & Deductions ({requirements.length})
+            Pantry deductions
           </h3>
           <span className="text-[11px] px-2 py-0.5 rounded-full bg-brand-lightgreen text-brand-darkgreen font-semibold">
             {itemsWithShortfall} needed to buy
@@ -40,10 +40,10 @@ export const RequirementsBreakdown: React.FC<RequirementsBreakdownProps> = ({
           )}
         </div>
 
-        <button className="text-brand-muted hover:text-brand-text">
+        <span className="text-brand-muted">
           {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-        </button>
-      </div>
+        </span>
+      </button>
 
       {isExpanded && (
         <div className="border-t border-brand-border/60">

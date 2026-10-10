@@ -40,7 +40,10 @@ export const MapView: React.FC<MapViewProps> = ({
     layerGroupRef.current = layerGroup;
     mapInstanceRef.current = map;
 
+    const observer = new ResizeObserver(() => { map.invalidateSize(); });
+    observer.observe(mapContainerRef.current);
     return () => {
+      observer.disconnect();
       map.remove();
       mapInstanceRef.current = null;
     };
@@ -64,7 +67,7 @@ export const MapView: React.FC<MapViewProps> = ({
       className: '',
       html: `
         <div style="background-color: #2D6A4F; color: white; border-radius: 9999px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 2px solid white;">
-          🏠
+          S
         </div>
       `,
       iconSize: [32, 32],
@@ -96,7 +99,7 @@ export const MapView: React.FC<MapViewProps> = ({
       const alloc = plan.storeAllocations.find((a) => a.store.id === store.id);
 
       const iconBg = isVisited ? store.color : isExcluded ? '#9CA3AF' : '#6C757D';
-      const iconText = isVisited ? `${stopIndex + 1}` : '🛒';
+      const iconText = isVisited ? `${stopIndex + 1}` : '•';
       const iconOpacity = isExcluded ? '0.5' : '1.0';
 
       const storeIcon = L.divIcon({
@@ -174,11 +177,11 @@ export const MapView: React.FC<MapViewProps> = ({
   }, [plan, tripContext, onSelectStore]);
 
   return (
-    <div className="relative w-full h-[320px] sm:h-[400px] lg:h-[480px] rounded-2xl overflow-hidden border border-brand-border shadow-card">
+    <div className="relative isolate w-full h-[320px] sm:h-[400px] lg:h-[480px] rounded-2xl overflow-hidden border border-brand-border shadow-card">
       <div ref={mapContainerRef} className="w-full h-full" />
 
       {/* Map Legend Overlay */}
-      <div className="absolute top-3 left-3 z-[1000] bg-white/95 backdrop-blur-sm px-3 py-2 rounded-xl border border-brand-border shadow-soft text-[11px] space-y-1">
+      <div className="absolute bottom-7 left-3 z-[20] bg-white/95 backdrop-blur-sm px-3 py-2 rounded-xl border border-brand-border shadow-soft text-[11px] space-y-1">
         <div className="font-bold text-brand-darkgreen flex items-center gap-1.5">
           <span>Chapel Hill / Durham Route</span>
           <span className="text-[9px] px-1.5 py-0.2 rounded bg-brand-subtle text-brand-muted">

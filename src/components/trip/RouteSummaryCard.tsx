@@ -84,7 +84,7 @@ export const RouteSummaryCard: React.FC<RouteSummaryCardProps> = ({
         <div className="p-3 bg-red-50 rounded-xl border border-red-200 text-red-800 text-xs space-y-1">
           <div className="font-bold flex items-center gap-1.5">
             <AlertTriangle className="w-3.5 h-3.5 text-red-600" />
-            Plan Constraints Violation
+            This plan needs attention
           </div>
           <ul className="list-disc list-inside space-y-0.5 text-[11px] text-red-700">
             {plan.feasibilityIssues.map((issue, idx) => (
@@ -96,7 +96,7 @@ export const RouteSummaryCard: React.FC<RouteSummaryCardProps> = ({
 
       {/* Route Journey Stops Timeline */}
       {plan.routeStops.length > 0 && (
-        <div className="pt-2 border-t border-brand-border/60">
+        <details className="quick-add pt-2 border-t border-brand-border/60"><summary>Route details · {plan.routeStops.length} stops</summary>
           <div className="text-[11px] font-bold uppercase tracking-wider text-brand-muted mb-2">
             Trip Stop Sequence ({plan.routeStops.length} stops)
           </div>
@@ -152,7 +152,7 @@ export const RouteSummaryCard: React.FC<RouteSummaryCardProps> = ({
               </>
             )}
           </div>
-        </div>
+        </details>
       )}
 
       {/* Start Shopping CTA */}
@@ -166,7 +166,7 @@ export const RouteSummaryCard: React.FC<RouteSummaryCardProps> = ({
         }`}
       >
         <Navigation className="w-4 h-4" />
-        <span>Start In-Store Shopping Session</span>
+        <span>Start shopping</span>
       </button>
     </div>
   );

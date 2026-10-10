@@ -49,22 +49,20 @@ export function App() {
   // Left Panel: Needs & Pantry
   const leftPanel = (
     <div className="space-y-4">
-      <NaturalLanguageInput
-        onAddInput={addFromNaturalLanguage}
-        lastNotification={lastNotification}
-      />
       <ActiveNeedsList
         intents={intents}
         onRemoveIntent={removeIntent}
         onUpdateServings={updateServings}
         onClearAll={clearAllIntents}
       />
+      <details className="disclosure"><summary>My pantry <span>{pantryItems.length} items · edit inventory</span></summary><div className="pt-4">
       <PantryInventory
         pantryItems={pantryItems}
         onUpdatePantry={updatePantry}
         onDeleteItem={deletePantryItem}
         onResetPantry={resetPantry}
       />
+      </div></details>
     </div>
   );
 
@@ -80,6 +78,12 @@ export function App() {
         onToggleStoreExclusion={toggleStoreExclusion}
       />
 
+      <RouteSummaryCard
+        plan={plan}
+        tripContext={tripContext}
+        onStartShopping={startShopping}
+      />
+
       <RequirementsBreakdown requirements={requirements} plan={plan} />
 
       {/* Unresolved Requirements Alert */}
@@ -87,7 +91,7 @@ export function App() {
         <div className="p-4 bg-amber-50 rounded-2xl border border-amber-200 text-amber-900 text-xs space-y-1">
           <div className="font-bold flex items-center gap-1.5">
             <AlertCircle className="w-4 h-4 text-amber-600" />
-            Unresolved Shopping Requirements ({plan.unresolvedRequirements.length})
+            Items still needed ({plan.unresolvedRequirements.length})
           </div>
           <p className="text-amber-800 text-[11px]">
             The following items could not be found in currently included stores. Consider enabling
@@ -108,11 +112,11 @@ export function App() {
 
       {/* Store Allocation Cards */}
       {plan.storeAllocations.length > 0 ? (
-        <div className="space-y-3">
+        <div className="store-grid space-y-3">
           <div className="text-xs font-bold uppercase tracking-wider text-brand-darkgreen flex items-center justify-between">
-            <span>Recommended Multi-Store Stops ({plan.storeAllocations.length})</span>
+            <span>Your store stops ({plan.storeAllocations.length})</span>
             <span className="text-[11px] font-normal text-brand-muted">
-              Optimal visit order
+              Visit order
             </span>
           </div>
 
@@ -146,11 +150,7 @@ export function App() {
 
       <MapView plan={plan} tripContext={tripContext} />
 
-      <RouteSummaryCard
-        plan={plan}
-        tripContext={tripContext}
-        onStartShopping={startShopping}
-      />
+
     </div>
   );
 
@@ -162,7 +162,9 @@ export function App() {
         canStartShopping={plan.routeStops.length > 0}
       />
 
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
+        <div className="page-intro"><div><p className="eyebrow">LESS PLANNING. BETTER SHOPPING.</p><h1>Your next shop, simplified.</h1><p>Bring your list. We’ll bring it together.</p></div><span className="demo-note">Demo prices & simulated routes</span></div>
+        <div className="input-wrap"><NaturalLanguageInput onAddInput={addFromNaturalLanguage} lastNotification={lastNotification} /></div>
         <ThreePanelLayout
           leftPanel={leftPanel}
           centerPanel={centerPanel}

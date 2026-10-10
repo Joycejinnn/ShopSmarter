@@ -31,12 +31,12 @@ export const StoreAllocationCard: React.FC<StoreAllocationCardProps> = ({
     <div className="bg-brand-card rounded-2xl border border-brand-border shadow-card overflow-hidden hover:border-brand-sage/60 transition-all">
       {/* Store Header */}
       <div className="p-4 bg-brand-canvas/70 border-b border-brand-border flex items-start justify-between gap-3">
-        <div className="flex items-start gap-3">
+        <div className="flex items-start gap-3 min-w-0">
           <div className="w-8 h-8 rounded-full bg-brand-darkgreen text-white flex items-center justify-center font-extrabold text-xs shadow-sm shrink-0">
             {stopIndex + 1}
           </div>
-          <div>
-            <div className="flex items-center gap-2">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
               <h4 className="font-bold text-sm text-brand-darkgreen">{store.name}</h4>
               <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full bg-brand-subtle text-brand-muted">
                 {store.category}
@@ -44,7 +44,7 @@ export const StoreAllocationCard: React.FC<StoreAllocationCardProps> = ({
             </div>
             <div className="text-[11px] text-brand-muted flex items-center gap-1 mt-0.5">
               <MapPin className="w-3 h-3 text-stone-400 shrink-0" />
-              <span className="truncate">{store.address}</span>
+              <span className="break-words">{store.address}</span>
             </div>
           </div>
         </div>
@@ -60,12 +60,8 @@ export const StoreAllocationCard: React.FC<StoreAllocationCardProps> = ({
         </div>
       </div>
 
-      {/* Rationale Pill */}
-      <div className="px-4 py-2 bg-brand-lightgreen/40 border-b border-brand-border/40 text-[11px] text-brand-darkgreen flex items-center gap-1.5 font-medium">
-        <Sparkles className="w-3.5 h-3.5 text-brand-primary shrink-0" />
-        <span>{selectionReason}</span>
-      </div>
-
+      <details className="store-products"><summary>{items.length} products <span>View items & package details</span></summary>
+      <p className="px-5 pb-2 text-sm text-brand-muted">{selectionReason}</p>
       {/* Items Assigned to Store */}
       <div className="divide-y divide-brand-border/50 p-2">
         {items.map(({ requirement, option }, idx) => (
@@ -74,13 +70,13 @@ export const StoreAllocationCard: React.FC<StoreAllocationCardProps> = ({
             className="p-2.5 flex items-center justify-between gap-3 hover:bg-brand-canvas/30 rounded-xl transition-colors text-xs"
           >
             <div className="min-w-0">
-              <div className="font-bold text-brand-darkgreen truncate flex items-center gap-1.5">
+              <div className="font-bold text-brand-darkgreen flex flex-wrap items-center gap-1.5">
                 <span>{option.product.name}</span>
                 <span className="text-[10px] font-normal text-stone-400">
                   ({option.product.brand})
                 </span>
               </div>
-              <div className="text-[11px] text-brand-muted flex items-center gap-2 mt-0.5">
+              <div className="text-[11px] text-brand-muted flex flex-wrap items-center gap-2 mt-0.5">
                 <span>
                   Needed: {requirement.shortfall} {requirement.unit}
                 </span>
@@ -109,18 +105,7 @@ export const StoreAllocationCard: React.FC<StoreAllocationCardProps> = ({
         ))}
       </div>
 
-      {/* Footer Summary */}
-      <div className="p-3 bg-brand-canvas/50 border-t border-brand-border flex items-center justify-between text-xs font-semibold text-brand-darkgreen">
-        <span className="text-brand-muted text-[11px]">
-          {items.length} product(s) assigned
-        </span>
-        <div className="flex items-center gap-3">
-          <span>Carry Weight: {totalWeightKg.toFixed(1)} kg</span>
-          <span className="font-extrabold text-sm text-brand-primary">
-            Subtotal: ${subtotalCost.toFixed(2)}
-          </span>
-        </div>
-      </div>
+    </details>
     </div>
   );
 };

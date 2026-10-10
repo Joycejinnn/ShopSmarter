@@ -26,14 +26,14 @@ export const OptimizationControls: React.FC<OptimizationControlsProps> = ({
       <div className="flex items-center justify-between">
         <label className="text-xs font-bold uppercase tracking-wider text-brand-darkgreen flex items-center gap-1.5">
           <SlidersHorizontal className="w-3.5 h-3.5 text-brand-primary" />
-          Optimization Goal
+          Plan preference
         </label>
-        <span className="text-[11px] text-brand-muted">Combinatorial Algorithm</span>
+
       </div>
 
       <div className="grid grid-cols-3 gap-2">
         <button
-          onClick={() => onSetOptimizationMode('money')}
+          aria-pressed={optimizationMode === 'money'} onClick={() => onSetOptimizationMode('money')}
           className={`p-2.5 rounded-xl border text-left transition-all ${
             optimizationMode === 'money'
               ? 'bg-emerald-50 border-brand-emerald text-brand-darkgreen shadow-sm ring-1 ring-brand-emerald'
@@ -50,7 +50,7 @@ export const OptimizationControls: React.FC<OptimizationControlsProps> = ({
         </button>
 
         <button
-          onClick={() => onSetOptimizationMode('time')}
+          aria-pressed={optimizationMode === 'time'} onClick={() => onSetOptimizationMode('time')}
           className={`p-2.5 rounded-xl border text-left transition-all ${
             optimizationMode === 'time'
               ? 'bg-blue-50 border-blue-500 text-blue-900 shadow-sm ring-1 ring-blue-400'
@@ -67,7 +67,7 @@ export const OptimizationControls: React.FC<OptimizationControlsProps> = ({
         </button>
 
         <button
-          onClick={() => onSetOptimizationMode('balanced')}
+          aria-pressed={optimizationMode === 'balanced'} onClick={() => onSetOptimizationMode('balanced')}
           className={`p-2.5 rounded-xl border text-left transition-all ${
             optimizationMode === 'balanced'
               ? 'bg-brand-lightgreen border-brand-primary text-brand-darkgreen shadow-sm ring-1 ring-brand-primary'
@@ -84,6 +84,7 @@ export const OptimizationControls: React.FC<OptimizationControlsProps> = ({
         </button>
       </div>
 
+      <details className="quick-add"><summary>Store preferences <span>Up to {maxStops} stops · {DEMO_STORES.length - excludedStoreIds.length} stores included</span></summary>
       {/* Constraints: Max Stops & Excluded Stores */}
       <div className="pt-2 border-t border-brand-border/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
         <div className="flex items-center gap-2">
@@ -112,7 +113,7 @@ export const OptimizationControls: React.FC<OptimizationControlsProps> = ({
             const isExcluded = excludedStoreIds.includes(store.id);
             return (
               <button
-                key={store.id}
+                key={store.id} aria-pressed={!isExcluded}
                 onClick={() => onToggleStoreExclusion(store.id)}
                 className={`px-2 py-1 rounded-md text-[11px] font-medium border flex items-center gap-1 transition-all ${
                   isExcluded
@@ -132,6 +133,7 @@ export const OptimizationControls: React.FC<OptimizationControlsProps> = ({
           })}
         </div>
       </div>
+      </details>
     </div>
   );
 };

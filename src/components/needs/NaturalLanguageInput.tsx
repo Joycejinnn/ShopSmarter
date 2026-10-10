@@ -33,15 +33,16 @@ export const NaturalLanguageInput: React.FC<NaturalLanguageInputProps> = ({
   return (
     <div className="bg-brand-card p-4 rounded-2xl border border-brand-border shadow-card">
       <div className="flex items-center justify-between mb-2">
-        <label className="text-xs font-bold uppercase tracking-wider text-brand-darkgreen flex items-center gap-1.5">
+        <label htmlFor="shopping-input" className="text-xs font-bold uppercase tracking-wider text-brand-darkgreen flex items-center gap-1.5">
           <Sparkles className="w-3.5 h-3.5 text-brand-orange" />
-          Natural-Language Shopping Input
+          What’s on your list?
         </label>
-        <span className="text-[11px] text-brand-muted">Multimodal Recipe & Essentials</span>
+
       </div>
 
       <form onSubmit={handleSubmit} className="relative">
         <textarea
+          id="shopping-input"
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           onKeyDown={(e) => {
@@ -50,8 +51,8 @@ export const NaturalLanguageInput: React.FC<NaturalLanguageInputProps> = ({
               handleSubmit(e);
             }
           }}
-          placeholder="What are you planning to cook or buy today? e.g. I want to make mapo tofu and tomato egg stir-fry for two people. I also need milk, toilet paper, and laundry detergent."
-          rows={3}
+          placeholder="e.g. Mapo tofu for two, milk, and laundry detergent"
+          rows={2}
           className="w-full text-xs sm:text-sm p-3 pr-24 rounded-xl border border-brand-border bg-brand-canvas focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-sage/50 focus:border-brand-primary resize-none placeholder:text-stone-400 text-brand-text transition-all leading-relaxed"
         />
 
@@ -73,7 +74,7 @@ export const NaturalLanguageInput: React.FC<NaturalLanguageInputProps> = ({
             ) : (
               <>
                 <Plus className="w-3.5 h-3.5" />
-                <span>Parse & Add</span>
+                <span>Add to list</span>
               </>
             )}
           </button>
@@ -84,13 +85,13 @@ export const NaturalLanguageInput: React.FC<NaturalLanguageInputProps> = ({
       {lastNotification && (
         <div className="mt-2 text-[11px] px-2.5 py-1.5 rounded-lg bg-brand-subtle text-brand-darkgreen border border-brand-border/60 flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-brand-primary shrink-0"></span>
-          <span className="truncate">{lastNotification}</span>
+          <span role="status">{lastNotification}</span>
         </div>
       )}
 
       {/* Fast preset pills */}
-      <div className="mt-3 pt-2.5 border-t border-brand-border/60">
-        <div className="text-[11px] font-semibold text-brand-muted mb-1.5 flex items-center gap-1">
+      <details className="quick-add mt-3"><summary>Quick add recipes & essentials</summary>
+        <div className="sr-only">
           <ChefHat className="w-3 h-3 text-brand-sage" />
           Quick Add Recipes & Essentials:
         </div>
@@ -138,7 +139,7 @@ export const NaturalLanguageInput: React.FC<NaturalLanguageInputProps> = ({
             + Milk & Eggs
           </button>
         </div>
-      </div>
+      </details>
     </div>
   );
 };

@@ -14,13 +14,16 @@ All cache, temporary files, and dependencies reside entirely on your workspace d
 # 1. Open terminal in project root
 cd E:\Shopsmarter
 
-# 2. Run unit test suite (12 comprehensive tests)
+# 2. Install the exact dependency versions from package-lock.json
+npm ci
+
+# 3. Run unit test suite (12 comprehensive tests)
 npm test
 
-# 3. Start local development server
+# 4. Start local development server
 npm run dev
 
-# 4. Or build and preview production bundle
+# 5. Or build and preview production bundle
 npm run build
 npm run preview
 ```

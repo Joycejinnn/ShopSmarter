@@ -19,75 +19,15 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-      <header className="bg-brand-card border-b border-brand-border sticky top-0 z-30 shadow-soft">
-        <div className="max-w-[1720px] mx-auto px-4 sm:px-6 py-3">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-            {/* Brand Title & Tagline */}
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-primary to-brand-sage flex items-center justify-center text-white shadow-card">
-                <ShoppingBag className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-xl font-extrabold tracking-tight text-brand-darkgreen">
-                    Shopsmarter
-                  </h1>
-                  <span className="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-brand-lightgreen text-brand-darkgreen">
-                    24h Hackathon MVP
-                  </span>
-                </div>
-                <p className="text-xs text-brand-muted hidden sm:block">
-                  Everything you need. The smartest way to get it.
-                </p>
-              </div>
-            </div>
-
-            {/* Clickable Demo Scenarios */}
-            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-              <span className="text-xs font-semibold text-brand-muted flex items-center gap-1 mr-1">
-                <Sparkles className="w-3.5 h-3.5 text-brand-orange" />
-                Demos:
-              </span>
-              {DEMO_SCENARIOS.map((scenario) => (
-                <button
-                  key={scenario.id}
-                  onClick={() => onLoadScenario(scenario.id)}
-                  className="px-2.5 py-1.5 rounded-lg text-xs font-medium border border-brand-border bg-brand-canvas hover:bg-brand-lightgreen hover:border-brand-sage hover:text-brand-darkgreen transition-colors text-brand-text flex items-center gap-1 shadow-sm"
-                  title={scenario.description}
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-brand-emerald"></span>
-                  {scenario.badge}
-                </button>
-              ))}
-            </div>
-
-            {/* Right Action Buttons */}
-            <div className="flex items-center gap-2 self-end lg:self-auto">
-              <button
-                onClick={() => setShowApiModal(true)}
-                className="px-2.5 py-1.5 rounded-lg text-xs font-medium border border-brand-border text-brand-muted hover:text-brand-text hover:bg-brand-subtle flex items-center gap-1.5 transition-colors"
-                title="View Modular API Architecture"
-              >
-                <Layers className="w-3.5 h-3.5 text-brand-sage" />
-                <span className="hidden sm:inline">API Status</span>
-              </button>
-
-              <button
-                onClick={onStartShopping}
-                disabled={!canStartShopping}
-                className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shadow-card transition-all ${
-                  canStartShopping
-                    ? 'bg-brand-primary text-white hover:bg-brand-darkgreen hover:shadow-floating active:scale-95'
-                    : 'bg-stone-200 text-stone-400 cursor-not-allowed'
-                }`}
-              >
-                <Navigation className="w-4 h-4" />
-                <span>Start Shopping Trip</span>
-              </button>
-            </div>
-          </div>
+      <a className="skip-link" href="#main-content">Skip to main content</a>
+      <header className="app-header"><div className="header-inner">
+        <a href="#main-content" className="wordmark"><ShoppingBag size={23} aria-hidden="true" />Shopsmarter<span className="brand-dot">.</span></a>
+        <div className="header-tools">
+          <label className="sr-only" htmlFor="demo-scenario">Try a demo</label>
+          <select id="demo-scenario" value="" onChange={e => {if(e.target.value) onLoadScenario(e.target.value);}}><option value="">Try a demo</option>{DEMO_SCENARIOS.map(s => <option key={s.id} value={s.id}>{s.badge}</option>)}</select>
+          <button onClick={() => setShowApiModal(true)} className="about-button"><Info size={16} aria-hidden="true" /><span>About the data</span></button>
         </div>
-      </header>
+      </div></header>
 
       {/* API Adapters Architecture Modal */}
       {showApiModal && (
@@ -107,7 +47,7 @@ export const Header: React.FC<HeaderProps> = ({
                   </p>
                 </div>
               </div>
-              <button
+              <button aria-label="Close data information"
                 onClick={() => setShowApiModal(false)}
                 className="p-1 rounded-lg text-brand-muted hover:bg-brand-subtle"
               >
@@ -148,7 +88,7 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
 
             <div className="pt-3 border-t border-brand-border flex justify-end">
-              <button
+              <button aria-label="Close data information"
                 onClick={() => setShowApiModal(false)}
                 className="px-4 py-2 bg-brand-primary text-white text-xs font-semibold rounded-xl hover:bg-brand-darkgreen"
               >
