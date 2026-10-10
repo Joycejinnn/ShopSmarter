@@ -1,0 +1,187 @@
+import React from 'react';
+import { useShopsmarterState } from './hooks/useShopsmarterState';
+import { Header } from './components/layout/Header';
+import { ThreePanelLayout } from './components/layout/ThreePanelLayout';
+import { NaturalLanguageInput } from './components/needs/NaturalLanguageInput';
+import { ActiveNeedsList } from './components/needs/ActiveNeedsList';
+import { PantryInventory } from './components/needs/PantryInventory';
+import { OptimizationControls } from './components/plan/OptimizationControls';
+import { RequirementsBreakdown } from './components/plan/RequirementsBreakdown';
+import { StoreAllocationCard } from './components/plan/StoreAllocationCard';
+import { TripContextPanel } from './components/trip/TripContextPanel';
+import { MapView } from './components/trip/MapView';
+import { RouteSummaryCard } from './components/trip/RouteSummaryCard';
+import { ShoppingModeModal } from './components/shopping/ShoppingModeModal';
+import { AlertCircle, ShoppingBag } from 'lucide-react';
+
+export function App() {
+  const {
+    intents,
+    pantryItems,
+    tripContext,
+    optimizationMode,
+    requirements,
+    plan,
+    shoppingSession,
+    lastNotification,
+    addFromNaturalLanguage,
+    removeIntent,
+    updateServings,
+    clearAllIntents,
+    updatePantry,
+    deletePantryItem,
+    resetPantry,
+    setTransportMode,
+    setCarryingBagType,
+    setMaxStops,
+    setOrigin,
+    setDestinationMode,
+    toggleStoreExclusion,
+    setOptimizationMode,
+    loadScenario,
+    startShopping,
+    markItemPurchased,
+    markItemOutOfStock,
+    completeTripAndSyncPantry,
+    cancelShopping
+  } = useShopsmarterState();
+
+  // Left Panel: Needs & Pantry
+  const leftPanel = (
+    <div className="space-y-4">
+      <NaturalLanguageInput
+        onAddInput={addFromNaturalLanguage}
+        lastNotification={lastNotification}
+      />
+      <ActiveNeedsList
+        intents={intents}
+        onRemoveIntent={removeIntent}
+        onUpdateServings={updateServings}
+        onClearAll={clearAllIntents}
+      />
+      <PantryInventory
+        pantryItems={pantryItems}
+        onUpdatePantry={updatePantry}
+        onDeleteItem={deletePantryItem}
+        onResetPantry={resetPantry}
+      />
+    </div>
+  );
+
+  // Center Panel: Shopping Plan & Multi-Store Allocations
+  const centerPanel = (
+    <div className="space-y-4">
+      <OptimizationControls
+        optimizationMode={optimizationMode}
+        onSetOptimizationMode={setOptimizationMode}
+        maxStops={tripContext.maxStops}
+        onSetMaxStops={setMaxStops}
+        excludedStoreIds={tripContext.excludedStoreIds}
+        onToggleStoreExclusion={toggleStoreExclusion}
+      />
+
+      <RequirementsBreakdown requirements={requirements} plan={plan} />
+
+      {/* Unresolved Requirements Alert */}
+      {plan.unresolvedRequirements.length > 0 && (
+        <div className="p-4 bg-amber-50 rounded-2xl border border-amber-200 text-amber-900 text-xs space-y-1">
+          <div className="font-bold flex items-center gap-1.5">
+            <AlertCircle className="w-4 h-4 text-amber-600" />
+            Unresolved Shopping Requirements ({plan.unresolvedRequirements.length})
+          </div>
+          <p className="text-amber-800 text-[11px]">
+            The following items could not be found in currently included stores. Consider enabling
+            specialty stores (e.g. Li Ming's Global Mart) or adjusting excluded stores:
+          </p>
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            {plan.unresolvedRequirements.map((ur) => (
+              <span
+                key={ur.ingredientId}
+                className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 font-semibold text-[11px]"
+              >
+                {ur.name} ({ur.shortfall} {ur.unit})
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Store Allocation Cards */}
+      {plan.storeAllocations.length > 0 ? (
+        <div className="space-y-3">
+          <div className="text-xs font-bold uppercase tracking-wider text-brand-darkgreen flex items-center justify-between">
+            <span>Recommended Multi-Store Stops ({plan.storeAllocations.length})</span>
+            <span className="text-[11px] font-normal text-brand-muted">
+              Optimal visit order
+            </span>
+          </div>
+
+          {plan.storeAllocations.map((alloc, idx) => (
+            <StoreAllocationCard key={alloc.store.id} allocation={alloc} stopIndex={idx} />
+          ))}
+        </div>
+      ) : (
+        <div className="p-8 bg-brand-card rounded-2xl border border-brand-border text-center text-xs text-brand-muted space-y-2 shadow-sm">
+          <ShoppingBag className="w-8 h-8 text-stone-300 mx-auto" />
+          <p className="font-bold text-brand-darkgreen">No store visits required or planned</p>
+          <p className="max-w-xs mx-auto text-[11px]">
+            Add recipes or household items above to generate an optimized multi-store shopping plan.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+
+  // Right Panel: Map & Multimodal Trip
+  const rightPanel = (
+    <div className="space-y-4">
+      <TripContextPanel
+        tripContext={tripContext}
+        onSetTransportMode={setTransportMode}
+        onSetCarryingBagType={setCarryingBagType}
+        onSetOrigin={setOrigin}
+        onSetDestinationMode={setDestinationMode}
+        currentPlanWeightKg={plan.totalWeightKg}
+      />
+
+      <MapView plan={plan} tripContext={tripContext} />
+
+      <RouteSummaryCard
+        plan={plan}
+        tripContext={tripContext}
+        onStartShopping={startShopping}
+      />
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-brand-canvas text-brand-text flex flex-col">
+      <Header
+        onLoadScenario={loadScenario}
+        onStartShopping={startShopping}
+        canStartShopping={plan.routeStops.length > 0}
+      />
+
+      <main className="flex-1">
+        <ThreePanelLayout
+          leftPanel={leftPanel}
+          centerPanel={centerPanel}
+          rightPanel={rightPanel}
+        />
+      </main>
+
+      {/* Live In-Store Shopping Session Modal */}
+      {shoppingSession.isActive && (
+        <ShoppingModeModal
+          session={shoppingSession}
+          plan={plan}
+          onMarkPurchased={markItemPurchased}
+          onMarkOutOfStock={markItemOutOfStock}
+          onCompleteTrip={completeTripAndSyncPantry}
+          onCancelShopping={cancelShopping}
+        />
+      )}
+    </div>
+  );
+}
+export default App;
