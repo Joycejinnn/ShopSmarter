@@ -50,3 +50,12 @@ Thumbs.db
 .agents/
 .agent/
 
+# Machine-specific npm configuration
+.npmrc
+
+# Internal planning and development notes
+IMPLEMENTATION_PLAN.md
+MERGE_NOTES.md
+ROUTING_API_OPTIONS.md
+TRANSITLAND_INTEGRATION_PLAN.md
+
