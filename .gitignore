@@ -45,3 +45,8 @@ Thumbs.db
 .env.*
 !.env.example
 .transit-cache/
+
+# Agent skills and workspace assistants
+.agents/
+.agent/
+
