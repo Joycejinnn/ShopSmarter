@@ -64,16 +64,11 @@ export const ActiveNeedsList: React.FC<ActiveNeedsListProps> = ({
               >
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-xs sm:text-sm text-brand-darkgreen truncate">
+                    <span className="font-bold text-xs sm:text-sm text-brand-darkgreen break-words">
                       {intent.recipeName}
                     </span>
-                    {recipe?.chineseName && (
-                      <span className="text-[10px] text-brand-muted font-normal">
-                        ({recipe.chineseName})
-                      </span>
-                    )}
                   </div>
-                  <div className="text-[11px] text-brand-muted flex items-center gap-2 mt-0.5">
+                  <div className="text-[11px] text-brand-muted flex flex-wrap items-center gap-2 mt-0.5">
                     <span>{recipe?.cuisine}</span>
                     <span>•</span>
                     <span>{recipe?.ingredients.length || 0} ingredients</span>

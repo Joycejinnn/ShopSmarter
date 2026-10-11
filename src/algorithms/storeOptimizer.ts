@@ -196,7 +196,7 @@ export function optimizeShoppingPlan(
     let bestPermutation: Store[] = actuallyUsedStores;
     let bestSegments: RouteSegment[] = [];
     let bestTravelMinutes = Infinity;
-    let bestTripCost = 0;
+
 
     for (const perm of permutations) {
       const segments: RouteSegment[] = [];
@@ -254,38 +254,22 @@ export function optimizeShoppingPlan(
         permDistanceMeters += destSeg.distanceMeters;
       }
 
-      // Calculate transport cost
-      const modeConfig = TRANSPORT_MODES_CONFIG[tripContext.transportMode];
-      let tripCost = 0;
-      if (tripContext.transportMode === 'driving') {
-        tripCost = (permDistanceMeters / 1000) * modeConfig.costPerKm;
-      } else if (tripContext.transportMode === 'transit') {
-        tripCost = modeConfig.baseFare; // Fixed regional fare
-      }
-
       if (permTravelMinutes < bestTravelMinutes) {
         bestTravelMinutes = permTravelMinutes;
         bestPermutation = perm;
         bestSegments = segments;
-        bestTripCost = Math.round(tripCost * 100) / 100;
+
       }
     }
 
     const shoppingMinutesPerStore = 12;
     const totalShoppingMinutes = actuallyUsedStores.length * shoppingMinutesPerStore;
     const totalTripMinutes = bestTravelMinutes + totalShoppingMinutes;
-    const totalCost = Math.round((totalGoodsCost + bestTripCost) * 100) / 100;
+    const totalCost = totalGoodsCost;
 
     // Check constraints
     const feasibilityIssues: string[] = [];
     let isFeasible = true;
-
-    if (totalWeightKg > tripContext.carryingCapacityKg) {
-      isFeasible = false;
-      feasibilityIssues.push(
-        `Total purchase weight (${totalWeightKg.toFixed(1)} kg) exceeds carrying capacity (${tripContext.carryingCapacityKg} kg for ${tripContext.carryingBagType.replace('_', ' ')}).`
-      );
-    }
 
     if (tripContext.maxBudget && totalCost > tripContext.maxBudget) {
       isFeasible = false;
@@ -299,7 +283,7 @@ export function optimizeShoppingPlan(
       routeStops: bestPermutation,
       routeSegments: bestSegments,
       totalGoodsCost,
-      totalTripCost: bestTripCost,
+      totalTripCost: 0,
       totalCost,
       totalTravelMinutes: bestTravelMinutes,
       totalShoppingMinutes,

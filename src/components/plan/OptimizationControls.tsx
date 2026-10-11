@@ -45,7 +45,7 @@ export const OptimizationControls: React.FC<OptimizationControlsProps> = ({
             <span>Save Money</span>
           </div>
           <div className="text-[10px] mt-0.5 opacity-80 leading-tight">
-            Lowest product & transit cost
+            Lowest goods cost
           </div>
         </button>
 

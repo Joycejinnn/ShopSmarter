@@ -6,7 +6,6 @@ import {
   ShoppingPlan,
   OptimizationPriority,
   TransportationMode,
-  CarryingBagType,
   LocationPoint,
   ShoppingSession
 } from '../types';
@@ -23,13 +22,6 @@ const DEFAULT_ORIGIN: LocationPoint = {
   label: DEMO_ORIGIN_LOCATIONS[1].label,
   source: 'demo',
   capturedAt: new Date().toISOString()
-};
-
-const BAG_CAPACITY_MAP: Record<CarryingBagType, number> = {
-  backpack: 5.0,
-  one_bag: 8.0,
-  two_bags: 15.0,
-  custom: 25.0
 };
 
 export function useShopsmarterState() {
@@ -49,8 +41,6 @@ export function useShopsmarterState() {
     destinationMode: 'return_to_origin',
     transportMode: 'walking',
     maxStops: 2,
-    carryingBagType: 'two_bags',
-    carryingCapacityKg: BAG_CAPACITY_MAP.two_bags,
     excludedStoreIds: []
   });
 
@@ -122,15 +112,6 @@ export function useShopsmarterState() {
     setTripContext((prev) => ({ ...prev, transportMode: mode }));
   }, []);
 
-  const setCarryingBagType = useCallback((bag: CarryingBagType, customWeight?: number) => {
-    const weight = bag === 'custom' && customWeight ? customWeight : BAG_CAPACITY_MAP[bag];
-    setTripContext((prev) => ({
-      ...prev,
-      carryingBagType: bag,
-      carryingCapacityKg: weight
-    }));
-  }, []);
-
   const setMaxStops = useCallback((stops: number) => {
     setTripContext((prev) => ({ ...prev, maxStops: Math.max(1, Math.min(5, stops)) }));
   }, []);
@@ -165,6 +146,7 @@ export function useShopsmarterState() {
     const scenario = DEMO_SCENARIOS.find((s) => s.id === scenarioId);
     if (!scenario) return;
 
+    setShoppingSession(prev => ({ ...prev, purchasedItems: [], skippedItems: [], isActive: false }));
     // Set settings
     const originLoc = DEMO_ORIGIN_LOCATIONS.find((loc) => loc.id === scenario.settings.originId) || DEMO_ORIGIN_LOCATIONS[0];
 
@@ -179,8 +161,6 @@ export function useShopsmarterState() {
       destinationMode: scenario.settings.destinationMode,
       transportMode: scenario.settings.transportMode,
       maxStops: 2,
-      carryingBagType: scenario.settings.carryingBagType,
-      carryingCapacityKg: BAG_CAPACITY_MAP[scenario.settings.carryingBagType],
       excludedStoreIds: scenario.settings.excludedStoreIds || []
     });
 
@@ -194,32 +174,24 @@ export function useShopsmarterState() {
 
   // Shopping Mode Handlers
   const startShopping = useCallback(() => {
-    setShoppingSession({
-      isActive: true,
-      currentStopIndex: 0,
-      purchasedItems: [],
-      skippedItems: [],
-      startedAt: new Date().toISOString()
-    });
+    setShoppingSession(prev => ({ ...prev, isActive: true, currentStopIndex: 0, startedAt: new Date().toISOString() }));
   }, []);
 
-  const markItemPurchased = useCallback(
-    (item: (typeof plan.storeAllocations)[0]['items'][0], storeId: string) => {
-      setShoppingSession((prev) => ({
-        ...prev,
-        purchasedItems: [
-          ...prev.purchasedItems,
-          {
-            requirement: item.requirement,
-            option: item.option,
-            storeId,
-            purchasedAt: new Date().toISOString()
-          }
-        ]
-      }));
-    },
-    []
-  );
+  const setItemPurchased = useCallback((item: (typeof plan.storeAllocations)[0]['items'][0], storeId: string, checked: boolean) => {
+    setShoppingSession(prev => ({ ...prev, purchasedItems: [
+      ...prev.purchasedItems.filter(p => !(p.requirement.ingredientId === item.requirement.ingredientId && p.storeId === storeId)),
+      ...(checked ? [{requirement: item.requirement, option: item.option, storeId, purchasedAt: new Date().toISOString()}] : [])
+    ] }));
+  }, []);
+  const markItemPurchased = useCallback((item: (typeof plan.storeAllocations)[0]['items'][0], storeId: string) => setItemPurchased(item, storeId, true), [setItemPurchased]);
+
+  // Keep checks only for the same current purchase; changed quantities require a new check.
+  useEffect(() => {
+    setShoppingSession(prev => {
+      const purchasedItems = prev.purchasedItems.filter(p => plan.storeAllocations.some(a => a.store.id === p.storeId && a.items.some(i => i.requirement.ingredientId === p.requirement.ingredientId && i.option.offer.offerId === p.option.offer.offerId && i.option.buyQuantity === p.option.buyQuantity)));
+      return purchasedItems.length === prev.purchasedItems.length ? prev : {...prev, purchasedItems};
+    });
+  }, [plan]);
 
   const markItemOutOfStock = useCallback(
     (item: (typeof plan.storeAllocations)[0]['items'][0], storeId: string) => {
@@ -256,13 +228,7 @@ export function useShopsmarterState() {
   }, [shoppingSession.purchasedItems]);
 
   const cancelShopping = useCallback(() => {
-    setShoppingSession({
-      isActive: false,
-      currentStopIndex: 0,
-      purchasedItems: [],
-      skippedItems: [],
-      startedAt: ''
-    });
+    setShoppingSession(prev => ({ ...prev, isActive: false }));
   }, []);
 
   return {
@@ -283,7 +249,6 @@ export function useShopsmarterState() {
     deletePantryItem,
     resetPantry,
     setTransportMode,
-    setCarryingBagType,
     setMaxStops,
     setOrigin,
     setDestinationMode,
@@ -292,6 +257,7 @@ export function useShopsmarterState() {
     loadScenario,
     startShopping,
     markItemPurchased,
+    setItemPurchased,
     markItemOutOfStock,
     completeTripAndSyncPantry,
     cancelShopping

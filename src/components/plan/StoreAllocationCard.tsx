@@ -1,15 +1,17 @@
 import React from 'react';
-import { StoreAllocation } from '../../types';
+import { StoreAllocation, ShoppingSession, StoreAllocationItem } from '../../types';
 import { Store, MapPin, Tag, Weight, Sparkles, CheckCircle2 } from 'lucide-react';
 
 interface StoreAllocationCardProps {
   allocation: StoreAllocation;
   stopIndex: number;
+  purchasedItems: ShoppingSession["purchasedItems"];
+  onSetPurchased: (item: StoreAllocationItem, storeId: string, checked: boolean) => void;
 }
 
 export const StoreAllocationCard: React.FC<StoreAllocationCardProps> = ({
   allocation,
-  stopIndex
+  stopIndex, purchasedItems, onSetPurchased
 }) => {
   const { store, items, subtotalCost, totalWeightKg } = allocation;
 
@@ -60,52 +62,17 @@ export const StoreAllocationCard: React.FC<StoreAllocationCardProps> = ({
         </div>
       </div>
 
-      <details className="store-products"><summary>{items.length} products <span>View items & package details</span></summary>
-      <p className="px-5 pb-2 text-sm text-brand-muted">{selectionReason}</p>
-      {/* Items Assigned to Store */}
-      <div className="divide-y divide-brand-border/50 p-2">
-        {items.map(({ requirement, option }, idx) => (
-          <div
-            key={requirement.ingredientId + idx}
-            className="p-2.5 flex items-center justify-between gap-3 hover:bg-brand-canvas/30 rounded-xl transition-colors text-xs"
-          >
-            <div className="min-w-0">
-              <div className="font-bold text-brand-darkgreen flex flex-wrap items-center gap-1.5">
-                <span>{option.product.name}</span>
-                <span className="text-[10px] font-normal text-stone-400">
-                  ({option.product.brand})
-                </span>
-              </div>
-              <div className="text-[11px] text-brand-muted flex flex-wrap items-center gap-2 mt-0.5">
-                <span>
-                  Needed: {requirement.shortfall} {requirement.unit}
-                </span>
-                <span>•</span>
-                <span className="text-brand-darkgreen font-semibold">
-                  Buying: {option.packs} × {option.offer.packQuantity} {option.offer.unit}
-                </span>
-                {option.surplus > 0 && (
-                  <span className="text-emerald-700 bg-emerald-50 px-1 rounded text-[10px]">
-                    +{option.surplus} surplus
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div className="text-right shrink-0">
-              <div className="font-bold text-brand-darkgreen text-xs">
-                ${option.totalCost.toFixed(2)}
-              </div>
-              <div className="text-[10px] text-stone-400">
-                {option.packs} × ${option.offer.packPrice.toFixed(2)}
-              </div>
-              <span className="text-[9px] text-stone-400 block">Demo estimate</span>
-            </div>
-          </div>
-        ))}
-      </div>
-
-    </details>
+      <ul className="purchase-list" aria-label={`${store.name} shopping list`}>
+        {items.filter(item => item.requirement.shortfall > 0).map(item => {
+          const {requirement, option} = item;
+          const checked = purchasedItems.some(p => p.storeId === store.id && p.requirement.ingredientId === requirement.ingredientId && p.option.offer.offerId === option.offer.offerId && p.option.buyQuantity === option.buyQuantity);
+          return <li key={requirement.ingredientId} className={checked ? 'purchase-row is-purchased' : 'purchase-row'}>
+            <label className="purchase-label"><input type="checkbox" checked={checked} onChange={e => onSetPurchased(item, store.id, e.target.checked)} /><span><span className="purchase-name">{option.product.name}</span><span className="purchase-quantity">{option.packs} × {option.offer.packQuantity} {option.offer.unit}{checked ? ' · Purchased' : ''}</span></span></label>
+            <span className="purchase-price">${option.totalCost.toFixed(2)}</span>
+            <details className="purchase-details"><summary>Package details</summary><p>{option.product.brand} · Needed: {requirement.shortfall} {requirement.unit} · {option.packs} × ${option.offer.packPrice.toFixed(2)}{option.surplus > 0 ? ` · ${option.surplus} extra ${option.offer.unit}` : ''}</p></details>
+          </li>;
+        })}
+      </ul>
     </div>
   );
 };

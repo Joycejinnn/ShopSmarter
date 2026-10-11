@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
+import { OriginInput } from './OriginInput';
 import {
   TripContext,
-  TransportationMode,
-  CarryingBagType,
   LocationPoint
 } from '../../types';
 import { DEMO_ORIGIN_LOCATIONS } from '../../data/stores';
@@ -23,23 +22,17 @@ import {
 
 interface TripContextPanelProps {
   tripContext: TripContext;
-  onSetTransportMode: (mode: TransportationMode) => void;
-  onSetCarryingBagType: (bag: CarryingBagType, customWeight?: number) => void;
   onSetOrigin: (origin: LocationPoint) => void;
   onSetDestinationMode: (
     mode: 'return_to_origin' | 'another_location' | 'finish_at_last_store',
     location?: LocationPoint
   ) => void;
-  currentPlanWeightKg: number;
 }
 
 export const TripContextPanel: React.FC<TripContextPanelProps> = ({
   tripContext,
-  onSetTransportMode,
-  onSetCarryingBagType,
   onSetOrigin,
-  onSetDestinationMode,
-  currentPlanWeightKg
+  onSetDestinationMode
 }) => {
   const { requestBrowserLocation, isLocating, error, clearError } = useGeolocation();
   const [showLocationPicker, setShowLocationPicker] = useState(false);
@@ -64,9 +57,6 @@ export const TripContextPanel: React.FC<TripContextPanelProps> = ({
       setShowLocationPicker(false);
     }
   };
-
-  const isOverweight = currentPlanWeightKg > tripContext.carryingCapacityKg;
-  const weightPercent = Math.min(100, Math.round((currentPlanWeightKg / tripContext.carryingCapacityKg) * 100));
 
   return (
     <div className="bg-brand-card p-4 rounded-2xl border border-brand-border shadow-card space-y-4">
@@ -103,7 +93,7 @@ export const TripContextPanel: React.FC<TripContextPanelProps> = ({
         {/* Location Selector Dropdown */}
         {showLocationPicker && (
           <div className="mt-2 p-3 bg-white rounded-xl border border-brand-border shadow-soft space-y-2 text-xs animate-in fade-in">
-            <div className="font-semibold text-brand-darkgreen text-[11px]">Choose Starting Location:</div>
+            <OriginInput onSelect={point => {onSetOrigin(point); setShowLocationPicker(false);}} />
 
             <button
               onClick={handleUseCurrentLocation}
@@ -170,106 +160,6 @@ export const TripContextPanel: React.FC<TripContextPanelProps> = ({
         </div>
       </div>
 
-      {/* Multimodal Transportation Selector */}
-      <div>
-        <label className="text-xs font-bold uppercase tracking-wider text-brand-darkgreen flex items-center justify-between mb-2">
-          <span className="flex items-center gap-1.5">
-            <Navigation className="w-3.5 h-3.5 text-brand-primary" />
-            Transportation Mode
-          </span>
-          <span className="text-[11px] font-normal text-brand-muted">Multimodal Routing</span>
-        </label>
-
-        <div className="grid grid-cols-4 gap-1.5">
-          {[
-            { mode: 'walking', label: 'Walking', icon: Footprints },
-            { mode: 'transit', label: 'Transit', icon: Bus },
-            { mode: 'cycling', label: 'Cycling', icon: Bike },
-            { mode: 'driving', label: 'Driving', icon: Car }
-          ].map(({ mode, label, icon: Icon }) => {
-            const isSelected = tripContext.transportMode === mode;
-            const config = TRANSPORT_MODES_CONFIG[mode as TransportationMode];
-            return (
-              <button
-                key={mode}
-                onClick={() => onSetTransportMode(mode as TransportationMode)}
-                className={`p-2 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all ${
-                  isSelected
-                    ? 'bg-brand-lightgreen border-brand-primary text-brand-darkgreen shadow-sm ring-1 ring-brand-primary font-bold'
-                    : 'bg-brand-canvas border-brand-border text-brand-muted hover:bg-stone-100 font-medium'
-                }`}
-                title={config.description}
-              >
-                <Icon className={`w-4 h-4 ${isSelected ? 'text-brand-primary' : 'text-stone-500'}`} />
-                <span className="text-xs">{label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="text-[10px] text-brand-muted mt-1.5">
-          {TRANSPORT_MODES_CONFIG[tripContext.transportMode].description}
-        </div>
-      </div>
-
-      {/* Carrying Capacity & Bag Limits */}
-      <div className="pt-2 border-t border-brand-border/60">
-        <div className="flex items-center justify-between mb-1.5">
-          <label className="text-xs font-bold uppercase tracking-wider text-brand-darkgreen flex items-center gap-1.5">
-            <Luggage className="w-3.5 h-3.5 text-brand-primary" />
-            Carrying Capacity
-          </label>
-          <span className="text-xs font-bold text-brand-darkgreen">
-            {currentPlanWeightKg.toFixed(1)} / {tripContext.carryingCapacityKg} kg
-          </span>
-        </div>
-
-        {/* Capacity options */}
-        <div className="grid grid-cols-3 gap-1.5">
-          {[
-            { bag: 'backpack', label: 'Backpack (5kg)' },
-            { bag: 'one_bag', label: '1 Bag (8kg)' },
-            { bag: 'two_bags', label: '2 Bags (15kg)' }
-          ].map(({ bag, label }) => (
-            <button
-              key={bag}
-              onClick={() => onSetCarryingBagType(bag as CarryingBagType)}
-              className={`p-1.5 rounded-lg border text-center text-xs transition-all ${
-                tripContext.carryingBagType === bag
-                  ? 'bg-brand-primary text-white font-bold border-brand-primary shadow-xs'
-                  : 'bg-brand-canvas border-brand-border text-brand-muted hover:bg-stone-100'
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        {/* Weight Bar Gauge */}
-        <div className="mt-2.5">
-          <div className="w-full h-2 rounded-full bg-stone-200 overflow-hidden">
-            <div
-              className={`h-full transition-all duration-300 ${
-                isOverweight
-                  ? 'bg-red-500'
-                  : weightPercent > 80
-                  ? 'bg-amber-500'
-                  : 'bg-brand-emerald'
-              }`}
-              style={{ width: `${Math.min(100, weightPercent)}%` }}
-            />
-          </div>
-
-          {isOverweight && (
-            <div className="mt-1.5 p-2 bg-red-50 rounded-lg border border-red-200 text-red-700 text-xs flex items-start gap-1.5">
-              <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-              <span>
-                Plan weight ({currentPlanWeightKg.toFixed(1)} kg) exceeds carrying capacity ({tripContext.carryingCapacityKg} kg). Consider choosing a 2-bag option or switching transport mode to driving.
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
     </div>
   );
 };

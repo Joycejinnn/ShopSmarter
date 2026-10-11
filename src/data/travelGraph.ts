@@ -64,7 +64,7 @@ export const TRANSPORT_MODES_CONFIG: Record<
     baseFare: 0.0,
     comfortMaxDistanceKm: 3.5,
     icon: 'Footprints',
-    description: 'Eco-friendly & healthy. Ideal within 1-2 miles. Carrying capacity is key.'
+    description: 'Walk between stores. No transportation cost.'
   },
   transit: {
     name: 'Public Transit',
@@ -82,7 +82,7 @@ export const TRANSPORT_MODES_CONFIG: Record<
     baseFare: 0.0,
     comfortMaxDistanceKm: 12.0,
     icon: 'Bike',
-    description: 'Fast local mobility. Limited by bike pannier / backpack weight.'
+    description: 'Cycle between stores. No transportation cost.'
   },
   driving: {
     name: 'Driving',
@@ -91,7 +91,7 @@ export const TRANSPORT_MODES_CONFIG: Record<
     baseFare: 0.0,
     comfortMaxDistanceKm: 50.0,
     icon: 'Car',
-    description: 'Fastest for long distances and heavy hauls. Incurs driving cost.'
+    description: 'Fastest for long distances and heavy hauls. Travel time is estimated.'
   }
 };
 

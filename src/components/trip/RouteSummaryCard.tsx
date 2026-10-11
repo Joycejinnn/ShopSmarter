@@ -23,7 +23,6 @@ export const RouteSummaryCard: React.FC<RouteSummaryCardProps> = ({
   tripContext,
   onStartShopping
 }) => {
-  const isOverweight = plan.totalWeightKg > tripContext.carryingCapacityKg;
 
   return (
     <div className="bg-brand-card p-4 rounded-2xl border border-brand-border shadow-card space-y-3">
@@ -40,14 +39,12 @@ export const RouteSummaryCard: React.FC<RouteSummaryCardProps> = ({
       <div className="grid grid-cols-3 gap-2 text-center">
         <div className="p-2.5 bg-brand-canvas rounded-xl border border-brand-border">
           <div className="text-[10px] text-brand-muted uppercase font-bold tracking-wider">
-            Total Cost
+            Total goods cost
           </div>
           <div className="text-base sm:text-lg font-extrabold text-brand-darkgreen mt-0.5">
-            ${plan.totalCost.toFixed(2)}
+            ${plan.totalGoodsCost.toFixed(2)}
           </div>
-          <div className="text-[10px] text-brand-muted">
-            Goods ${plan.totalGoodsCost.toFixed(2)} + Trip ${plan.totalTripCost.toFixed(2)}
-          </div>
+
         </div>
 
         <div className="p-2.5 bg-brand-canvas rounded-xl border border-brand-border">
@@ -64,18 +61,14 @@ export const RouteSummaryCard: React.FC<RouteSummaryCardProps> = ({
 
         <div className="p-2.5 bg-brand-canvas rounded-xl border border-brand-border">
           <div className="text-[10px] text-brand-muted uppercase font-bold tracking-wider">
-            Total Weight
+            Estimated weight
           </div>
           <div
-            className={`text-base sm:text-lg font-extrabold mt-0.5 ${
-              isOverweight ? 'text-red-600' : 'text-brand-darkgreen'
-            }`}
+            className="text-base sm:text-lg font-extrabold mt-0.5 text-brand-darkgreen"
           >
             {plan.totalWeightKg.toFixed(1)} kg
           </div>
-          <div className="text-[10px] text-brand-muted">
-            Cap: {tripContext.carryingCapacityKg} kg ({tripContext.carryingBagType.replace('_', ' ')})
-          </div>
+
         </div>
       </div>
 

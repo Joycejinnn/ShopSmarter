@@ -3,6 +3,7 @@ import L from 'leaflet';
 import { ShoppingPlan, TripContext, Store } from '../../types';
 import { DEMO_STORES } from '../../data/stores';
 
+const escapeHtml = (value: string) => value.replace(/[&<>"']/g, char => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[char]!));
 interface MapViewProps {
   plan: ShoppingPlan;
   tripContext: TripContext;
@@ -78,7 +79,7 @@ export const MapView: React.FC<MapViewProps> = ({
     originMarker.bindPopup(`
       <div style="font-family: inherit; font-size: 12px; line-height: 1.4;">
         <strong style="color: #1B4332;">Starting Point</strong><br/>
-        <span>${tripContext.origin.label}</span><br/>
+        <span>${escapeHtml(tripContext.origin.label)}</span><br/>
         <small style="color: #6C757D;">Mode: ${tripContext.transportMode}</small>
       </div>
     `);
@@ -164,7 +165,7 @@ export const MapView: React.FC<MapViewProps> = ({
         segment.geometry.forEach((pt) => bounds.extend(pt));
 
         polyline.bindTooltip(
-          `Leg ${idx + 1}: ${segment.fromName} → ${segment.toName} (${segment.durationMinutes} min, ${(segment.distanceMeters / 1000).toFixed(1)} km)`,
+          `Leg ${idx + 1}: ${escapeHtml(segment.fromName)} → ${escapeHtml(segment.toName)} (${segment.durationMinutes} min, ${(segment.distanceMeters / 1000).toFixed(1)} km)`,
           { sticky: true }
         );
       });

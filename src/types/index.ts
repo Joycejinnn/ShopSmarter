@@ -17,7 +17,6 @@ export type TransportationMode = 'walking' | 'transit' | 'cycling' | 'driving';
 
 export type OptimizationPriority = 'money' | 'time' | 'balanced';
 
-export type CarryingBagType = 'backpack' | 'one_bag' | 'two_bags' | 'custom';
 
 export interface LocationPoint {
   lat: number;
@@ -199,8 +198,6 @@ export interface TripContext {
   transportMode: TransportationMode;
   maxStops: number; // default 2
   maxBudget?: number;
-  carryingCapacityKg: number;
-  carryingBagType: CarryingBagType;
   excludedStoreIds: string[];
 }
 

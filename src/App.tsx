@@ -9,6 +9,7 @@ import { OptimizationControls } from './components/plan/OptimizationControls';
 import { RequirementsBreakdown } from './components/plan/RequirementsBreakdown';
 import { StoreAllocationCard } from './components/plan/StoreAllocationCard';
 import { TripContextPanel } from './components/trip/TripContextPanel';
+import { TransportSelector } from './components/plan/TransportSelector';
 import { MapView } from './components/trip/MapView';
 import { RouteSummaryCard } from './components/trip/RouteSummaryCard';
 import { ShoppingModeModal } from './components/shopping/ShoppingModeModal';
@@ -32,7 +33,6 @@ export function App() {
     deletePantryItem,
     resetPantry,
     setTransportMode,
-    setCarryingBagType,
     setMaxStops,
     setOrigin,
     setDestinationMode,
@@ -41,6 +41,7 @@ export function App() {
     loadScenario,
     startShopping,
     markItemPurchased,
+    setItemPurchased,
     markItemOutOfStock,
     completeTripAndSyncPantry,
     cancelShopping
@@ -49,6 +50,7 @@ export function App() {
   // Left Panel: Needs & Pantry
   const leftPanel = (
     <div className="space-y-4">
+      <NaturalLanguageInput onAddInput={addFromNaturalLanguage} lastNotification={lastNotification} />
       <ActiveNeedsList
         intents={intents}
         onRemoveIntent={removeIntent}
@@ -69,6 +71,7 @@ export function App() {
   // Center Panel: Shopping Plan & Multi-Store Allocations
   const centerPanel = (
     <div className="space-y-4">
+      <TransportSelector mode={tripContext.transportMode} onChange={setTransportMode} />
       <OptimizationControls
         optimizationMode={optimizationMode}
         onSetOptimizationMode={setOptimizationMode}
@@ -84,7 +87,7 @@ export function App() {
         onStartShopping={startShopping}
       />
 
-      <RequirementsBreakdown requirements={requirements} plan={plan} />
+
 
       {/* Unresolved Requirements Alert */}
       {plan.unresolvedRequirements.length > 0 && (
@@ -114,14 +117,14 @@ export function App() {
       {plan.storeAllocations.length > 0 ? (
         <div className="store-grid space-y-3">
           <div className="text-xs font-bold uppercase tracking-wider text-brand-darkgreen flex items-center justify-between">
-            <span>Your store stops ({plan.storeAllocations.length})</span>
+            <span>Shopping to-do list ({plan.storeAllocations.length})</span>
             <span className="text-[11px] font-normal text-brand-muted">
               Visit order
             </span>
           </div>
 
           {plan.storeAllocations.map((alloc, idx) => (
-            <StoreAllocationCard key={alloc.store.id} allocation={alloc} stopIndex={idx} />
+            <StoreAllocationCard key={alloc.store.id} allocation={alloc} stopIndex={idx} purchasedItems={shoppingSession.purchasedItems} onSetPurchased={setItemPurchased} />
           ))}
         </div>
       ) : (
@@ -139,13 +142,11 @@ export function App() {
   // Right Panel: Map & Multimodal Trip
   const rightPanel = (
     <div className="space-y-4">
+      <TransportSelector mode={tripContext.transportMode} onChange={setTransportMode} />
       <TripContextPanel
         tripContext={tripContext}
-        onSetTransportMode={setTransportMode}
-        onSetCarryingBagType={setCarryingBagType}
         onSetOrigin={setOrigin}
         onSetDestinationMode={setDestinationMode}
-        currentPlanWeightKg={plan.totalWeightKg}
       />
 
       <MapView plan={plan} tripContext={tripContext} />
@@ -164,7 +165,6 @@ export function App() {
 
       <main id="main-content" className="flex-1">
         <div className="page-intro"><div><p className="eyebrow">LESS PLANNING. BETTER SHOPPING.</p><h1>Your next shop, simplified.</h1><p>Bring your list. We’ll bring it together.</p></div><span className="demo-note">Demo prices & simulated routes</span></div>
-        <div className="input-wrap"><NaturalLanguageInput onAddInput={addFromNaturalLanguage} lastNotification={lastNotification} /></div>
         <ThreePanelLayout
           leftPanel={leftPanel}
           centerPanel={centerPanel}

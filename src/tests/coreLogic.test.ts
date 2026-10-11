@@ -21,8 +21,6 @@ describe('Shopsmarter Core Logic & Verification Suite', () => {
     destinationMode: 'return_to_origin',
     transportMode: 'walking',
     maxStops: 2,
-    carryingBagType: 'two_bags',
-    carryingCapacityKg: 15,
     excludedStoreIds: []
   };
 
@@ -208,8 +206,8 @@ describe('Shopsmarter Core Logic & Verification Suite', () => {
     expect(plan2.routeStops.some((s) => s.id === 'store_food_lion')).toBe(true);
   });
 
-  // Test 8: Carrying capacity violations are detected
-  it('Detects carrying capacity violations when weight exceeds limit', () => {
+  // Test 8: Purchase weight is informational
+  it('Reports estimated weight without rejecting a heavy shopping plan', () => {
     const intents: ShoppingIntent[] = [
       {
         id: 'int_detergent',
@@ -225,17 +223,15 @@ describe('Shopsmarter Core Logic & Verification Suite', () => {
     ];
 
     const shortfalls = calculateIngredientShortfalls(intents, []);
-    // Limit to 2.0kg backpack (Tide is 2.9kg)
+    // Weight is calculated for complete product packages.
     const strictContext: TripContext = {
       ...defaultTripContext,
-      carryingBagType: 'backpack',
-      carryingCapacityKg: 2.0
     };
 
     const plan = optimizeShoppingPlan(shortfalls, strictContext, 'balanced');
     expect(plan.totalWeightKg).toBeGreaterThan(2.0);
-    expect(plan.isFeasible).toBe(false);
-    expect(plan.feasibilityIssues.some((issue) => issue.includes('exceeds carrying capacity'))).toBe(true);
+    expect(plan.isFeasible).toBe(true);
+    expect(plan.feasibilityIssues).toEqual([]);
   });
 
   // Test 9: Purchased items persist into pantry after trip
@@ -374,7 +370,7 @@ describe('Shopsmarter Core Logic & Verification Suite', () => {
     ];
 
     const shortfalls = calculateIngredientShortfalls(intents, []);
-    const plan = optimizeShoppingPlan(shortfalls, defaultTripContext, 'balanced');
+    const plan = optimizeShoppingPlan(shortfalls, {...defaultTripContext, transportMode: 'driving'}, 'balanced');
 
     let sumOffers = 0;
     for (const alloc of plan.storeAllocations) {
@@ -384,6 +380,7 @@ describe('Shopsmarter Core Logic & Verification Suite', () => {
     }
 
     expect(Math.round(sumOffers * 100) / 100).toBe(plan.totalGoodsCost);
-    expect(plan.totalCost).toBe(Math.round((plan.totalGoodsCost + plan.totalTripCost) * 100) / 100);
+    expect(plan.totalTripCost).toBe(0);
+    expect(plan.totalCost).toBe(plan.totalGoodsCost);
   });
 });

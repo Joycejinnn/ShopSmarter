@@ -1,4 +1,4 @@
-import { TransportationMode, OptimizationPriority, CarryingBagType } from '../types';
+import { TransportationMode, OptimizationPriority } from '../types';
 
 export interface DemoScenario {
   id: string;
@@ -10,7 +10,6 @@ export interface DemoScenario {
   keyFeatures: string[];
   settings: {
     transportMode: TransportationMode;
-    carryingBagType: CarryingBagType;
     optimizationMode: OptimizationPriority;
     originId: string;
     destinationMode: 'return_to_origin' | 'finish_at_last_store';
@@ -34,7 +33,6 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
     ],
     settings: {
       transportMode: 'walking',
-      carryingBagType: 'two_bags',
       optimizationMode: 'balanced',
       originId: 'meadowmont_apts',
       destinationMode: 'return_to_origin'
@@ -55,7 +53,6 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
     ],
     settings: {
       transportMode: 'driving',
-      carryingBagType: 'two_bags',
       optimizationMode: 'money',
       originId: 'unc_campus',
       destinationMode: 'return_to_origin'
@@ -64,19 +61,18 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
   {
     id: 'scenario_c',
     name: 'Scenario C: Shopping Without a Car',
-    tag: 'Multimodal Transit & Carrying Capacity Limits',
-    badge: 'Transit & Bag Limit',
+    tag: 'Public Transit & Estimated Weight',
+    badge: 'Car-free Shopping',
     inputPrompt: 'I need jasmine rice, soft tofu, dish soap, and laundry detergent. I am taking public transit.',
-    description: 'Models a car-free urban shopper carrying a single shopping bag (8 kg limit) traveling via regional transit.',
+    description: 'Models a car-free urban shopper traveling via regional transit.',
     keyFeatures: [
       'GoTriangle Route 400 transit modeling with real travel times & fares',
-      'Enforces strict 8kg carrying weight constraint for 1 shopping bag',
-      'Warns if heavy bulk items (e.g. 5lb rice + detergent) approach limit',
+      'Shows estimated purchase weight',
+      'Includes full package weights for rice and detergent',
       'Optimizes multi-stop route connecting transit corridors'
     ],
     settings: {
       transportMode: 'transit',
-      carryingBagType: 'one_bag',
       optimizationMode: 'balanced',
       originId: 'unc_campus',
       destinationMode: 'return_to_origin'
@@ -97,7 +93,6 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
     ],
     settings: {
       transportMode: 'walking',
-      carryingBagType: 'two_bags',
       optimizationMode: 'time',
       originId: 'patterson_place',
       destinationMode: 'finish_at_last_store',
