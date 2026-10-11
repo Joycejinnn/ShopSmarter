@@ -23,10 +23,12 @@ export function scaleRecipeIngredients(
 // Overrides store the full edited recipe at the serving count when it was saved.
 export function getIntentIngredients(intent: ShoppingIntent): RecipeIngredient[] {
   const recipe = intent.recipeId ? getRecipeById(intent.recipeId) : undefined;
-  if (!recipe) return [];
-  const servings = intent.servings || recipe.defaultServings;
+  const servings = intent.servings || recipe?.defaultServings || 2;
   const source = intent.ingredientOverrides;
-  return scaleRecipeIngredients(source ? {
-    ...recipe, defaultServings: source.servings, ingredients: source.ingredients
-  } : recipe, servings);
+  const ingredients = source?.ingredients ?? intent.customIngredients ?? recipe?.ingredients ?? [];
+  const baseServings = source?.servings ?? (intent.customIngredients ? 2 : recipe?.defaultServings ?? 2);
+  return ingredients.map(ingredient => ({
+    ...ingredient,
+    quantity: Math.round(ingredient.quantity * servings / baseServings * 100) / 100
+  }));
 }

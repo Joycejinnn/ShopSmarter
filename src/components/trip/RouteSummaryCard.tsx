@@ -44,7 +44,6 @@ export const RouteSummaryCard: React.FC<RouteSummaryCardProps> = ({
           <div className="text-base sm:text-lg font-extrabold text-brand-darkgreen mt-0.5">
             ${plan.totalGoodsCost.toFixed(2)}
           </div>
-
         </div>
 
         <div className="p-2.5 bg-brand-canvas rounded-xl border border-brand-border">
@@ -94,6 +93,7 @@ export const RouteSummaryCard: React.FC<RouteSummaryCardProps> = ({
             Trip Stop Sequence ({plan.routeStops.length} stops)
           </div>
 
+          {tripContext.transportMode === 'transit' && <p className="mb-2 text-[11px] text-brand-muted">Transit routes, times and fares are estimates from a local network, not live schedules. Fares are excluded from goods cost.</p>}
           <div className="space-y-1.5 text-xs">
             {/* Origin */}
             <div className="flex items-center gap-2 text-brand-muted">
@@ -109,11 +109,34 @@ export const RouteSummaryCard: React.FC<RouteSummaryCardProps> = ({
               return (
                 <React.Fragment key={stop.id}>
                   {seg && (
-                    <div className="pl-2.5 py-0.5 text-[10px] text-brand-muted border-l-2 border-dashed border-brand-border ml-2.5 flex items-center gap-1">
-                      <ArrowRight className="w-3 h-3 text-brand-sage" />
-                      <span>
-                        {seg.durationMinutes} min ({tripContext.transportMode})
-                      </span>
+                    <div className="pl-2.5 py-0.5 text-[10px] text-brand-muted border-l-2 border-dashed border-brand-border ml-2.5 flex items-start gap-1">
+                      <ArrowRight className="w-3 h-3 text-brand-sage mt-0.5 shrink-0" />
+                      {seg.transitUnavailable ? <span>No transit connection found</span> : seg.transitDetails ? (
+                        <div className="flex flex-col gap-0.5">
+                          <span className="font-semibold text-blue-700">
+                            🚌 {seg.transitRouteName || 'Bus'} ({seg.durationMinutes} min{seg.transitFare !== undefined ? ` · ${seg.transitFare === 0 ? 'Free' : '$' + seg.transitFare.toFixed(2)}` : ''})
+                          </span>
+                          {seg.boardingStop && seg.debarkingStop && (
+                            <span className="text-[9px] text-stone-500">
+                              {seg.boardingStop.split('(')[0].trim()} → {seg.debarkingStop.split('(')[0].trim()}
+                            </span>
+                          )}
+                          {seg.transferStop && (
+                            <span className="text-[9px] text-amber-700 font-medium">
+                              🔄 Transfer at {seg.transferStop.split('(')[0].trim()}
+                            </span>
+                          )}
+                          {seg.firstMileWalkMeters !== undefined && seg.firstMileWalkMeters > 150 && (
+                            <span className="text-[9px] text-stone-600">
+                              🚶 Walk {seg.firstMileWalkMeters > 1000 ? (seg.firstMileWalkMeters / 1000).toFixed(1) + 'km' : seg.firstMileWalkMeters + 'm'} ({seg.firstMileWalkMinutes || 1}m) to stop{seg.isTransitDesert ? ' · ⚠️ Low transit coverage' : ''}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span>
+                          {seg.durationMinutes} min ({tripContext.transportMode})
+                        </span>
+                      )}
                     </div>
                   )}
 
@@ -130,11 +153,29 @@ export const RouteSummaryCard: React.FC<RouteSummaryCardProps> = ({
             {/* Destination */}
             {tripContext.destinationMode === 'return_to_origin' && (
               <>
-                <div className="pl-2.5 py-0.5 text-[10px] text-brand-muted border-l-2 border-dashed border-brand-border ml-2.5 flex items-center gap-1">
-                  <ArrowRight className="w-3 h-3 text-brand-sage" />
-                  <span>
-                    {plan.routeSegments[plan.routeSegments.length - 1]?.durationMinutes || 8} min return
-                  </span>
+                <div className="pl-2.5 py-0.5 text-[10px] text-brand-muted border-l-2 border-dashed border-brand-border ml-2.5 flex items-start gap-1">
+                  <ArrowRight className="w-3 h-3 text-brand-sage mt-0.5 shrink-0" />
+                  {plan.routeSegments[plan.routeSegments.length - 1]?.transitUnavailable ? <span>No transit connection found for return trip</span> : plan.routeSegments[plan.routeSegments.length - 1]?.transitDetails ? (
+                    <div className="flex flex-col gap-0.5">
+                      <span className="font-semibold text-blue-700">
+                        🚌 {plan.routeSegments[plan.routeSegments.length - 1].transitRouteName || 'Bus'} ({plan.routeSegments[plan.routeSegments.length - 1].durationMinutes} min return{plan.routeSegments[plan.routeSegments.length - 1].transitFare !== undefined ? ` · ${plan.routeSegments[plan.routeSegments.length - 1].transitFare === 0 ? 'Free' : '$' + plan.routeSegments[plan.routeSegments.length - 1].transitFare?.toFixed(2)}` : ''})
+                      </span>
+                      {plan.routeSegments[plan.routeSegments.length - 1].boardingStop && plan.routeSegments[plan.routeSegments.length - 1].debarkingStop && (
+                        <span className="text-[9px] text-stone-500">
+                          {plan.routeSegments[plan.routeSegments.length - 1].boardingStop?.split('(')[0].trim()} → {plan.routeSegments[plan.routeSegments.length - 1].debarkingStop?.split('(')[0].trim()}
+                        </span>
+                      )}
+                      {plan.routeSegments[plan.routeSegments.length - 1].transferStop && (
+                        <span className="text-[9px] text-amber-700 font-medium">
+                          🔄 Transfer at {plan.routeSegments[plan.routeSegments.length - 1].transferStop?.split('(')[0].trim()}
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <span>
+                      {plan.routeSegments[plan.routeSegments.length - 1]?.durationMinutes || 8} min return
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 text-brand-muted">
                   <span className="w-5 h-5 rounded-full bg-brand-primary text-white flex items-center justify-center text-[10px] font-bold shrink-0">

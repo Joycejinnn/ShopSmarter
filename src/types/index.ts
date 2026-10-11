@@ -61,6 +61,7 @@ export interface ShoppingIntent {
   recipeName?: string;
   ingredientOverrides?: { servings: number; ingredients: RecipeIngredient[] };
   servings?: number;
+  customIngredients?: RecipeIngredient[];
   directItem?: DirectItemIntent;
   rawText?: string;
   createdAt: string;
@@ -168,7 +169,16 @@ export interface RouteSegment {
   durationMinutes: number;
   transportMode: TransportationMode;
   transitFare?: number;
+  transitUnavailable?: boolean;
   transitDetails?: string;
+  transitRouteName?: string;
+  boardingStop?: string;
+  debarkingStop?: string;
+  transferStop?: string;
+  transferRouteName?: string;
+  firstMileWalkMeters?: number;
+  firstMileWalkMinutes?: number;
+  isTransitDesert?: boolean;
   geometry: [number, number][]; // lat/lng path points
 }
 
@@ -217,4 +227,12 @@ export interface ShoppingSession {
     reason: 'out_of_stock' | 'skipped';
   }[];
   startedAt: string;
+}
+
+export interface LLMConfig {
+  enabled: boolean;
+  provider: 'gemini' | 'openai' | 'ollama' | 'custom';
+  apiKey?: string;
+  endpoint?: string;
+  model?: string;
 }

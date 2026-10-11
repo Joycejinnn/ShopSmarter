@@ -74,7 +74,7 @@ export const ActiveNeedsList: React.FC<ActiveNeedsListProps> = ({
                     </span>
                   </div>
                   <div className="text-[11px] text-brand-muted flex flex-wrap items-center gap-2 mt-0.5">
-                    <span>{recipe?.cuisine}</span>
+                    <span>{recipe?.cuisine || (intent.customIngredients ? 'Custom Recipe' : 'Recipe')}</span>
                     <span>•</span>
                     <span>{ingredients.length} ingredients</span>
                   </div>
@@ -115,7 +115,7 @@ export const ActiveNeedsList: React.FC<ActiveNeedsListProps> = ({
                   </button>
                 </div>
                 </div>
-                {recipe && (
+                {intent.type === 'recipe' && (
                   <details className="mt-3 border-t border-brand-border pt-2">
                     <summary className="cursor-pointer text-xs font-semibold text-brand-primary rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-primary">
                       Ingredients for {servings} {servings === 1 ? 'serving' : 'servings'}

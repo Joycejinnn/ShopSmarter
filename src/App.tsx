@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useShopsmarterState } from './hooks/useShopsmarterState';
 import { Header } from './components/layout/Header';
 import { ThreePanelLayout } from './components/layout/ThreePanelLayout';
 import { NaturalLanguageInput } from './components/needs/NaturalLanguageInput';
+import { CustomRecipeModal } from './components/needs/CustomRecipeModal';
 import { ActiveNeedsList } from './components/needs/ActiveNeedsList';
 import { PantryInventory } from './components/needs/PantryInventory';
 import { OptimizationControls } from './components/plan/OptimizationControls';
@@ -26,6 +27,7 @@ export function App() {
     shoppingSession,
     lastNotification,
     addFromNaturalLanguage,
+    addCustomRecipe,
     removeIntent,
     updateServings,
     updateRecipeIngredients,
@@ -44,13 +46,23 @@ export function App() {
     setItemPurchased,
     markItemOutOfStock,
     completeTripAndSyncPantry,
-    cancelShopping
+    cancelShopping,
+    isParsingLLM
   } = useShopsmarterState();
+
+  const [customModalState, setCustomModalState] = useState<{ isOpen: boolean; dishName?: string }>({
+    isOpen: false
+  });
 
   // Left Panel: Needs & Pantry
   const leftPanel = (
     <div className="space-y-4">
-      <NaturalLanguageInput onAddInput={addFromNaturalLanguage} lastNotification={lastNotification} />
+      <NaturalLanguageInput
+        onAddInput={addFromNaturalLanguage}
+        lastNotification={lastNotification}
+        isParsing={isParsingLLM}
+        onOpenCustomModal={(dishName) => setCustomModalState({ isOpen: true, dishName })}
+      />
       <ActiveNeedsList
         intents={intents}
         onRemoveIntent={removeIntent}
@@ -180,6 +192,14 @@ export function App() {
           onCancelShopping={cancelShopping}
         />
       )}
+
+      {/* Manual Custom Recipe & Ingredients Modal (Option 3) */}
+      {customModalState.isOpen && <CustomRecipeModal
+        isOpen={customModalState.isOpen}
+        initialDishName={customModalState.dishName}
+        onClose={() => setCustomModalState({ isOpen: false })}
+        onSave={addCustomRecipe}
+      />}
     </div>
   );
 }

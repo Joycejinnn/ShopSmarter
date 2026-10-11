@@ -196,6 +196,7 @@ export function optimizeShoppingPlan(
     let bestPermutation: Store[] = actuallyUsedStores;
     let bestSegments: RouteSegment[] = [];
     let bestTravelMinutes = Infinity;
+    let bestUnavailableLegs = Infinity;
 
 
     for (const perm of permutations) {
@@ -254,7 +255,9 @@ export function optimizeShoppingPlan(
         permDistanceMeters += destSeg.distanceMeters;
       }
 
-      if (permTravelMinutes < bestTravelMinutes) {
+      const unavailableLegs = segments.filter(segment => segment.transitUnavailable).length;
+      if (unavailableLegs < bestUnavailableLegs || (unavailableLegs === bestUnavailableLegs && permTravelMinutes < bestTravelMinutes)) {
+        bestUnavailableLegs = unavailableLegs;
         bestTravelMinutes = permTravelMinutes;
         bestPermutation = perm;
         bestSegments = segments;
@@ -265,11 +268,19 @@ export function optimizeShoppingPlan(
     const shoppingMinutesPerStore = 12;
     const totalShoppingMinutes = actuallyUsedStores.length * shoppingMinutesPerStore;
     const totalTripMinutes = bestTravelMinutes + totalShoppingMinutes;
+    const totalTransitCost = tripContext.transportMode === 'transit'
+      ? Math.round(bestSegments.reduce((acc, s) => acc + (s.transitFare || 0), 0) * 100) / 100
+      : 0;
+    // Shopping totals and budgets remain goods-only; estimated transit fares are separate.
     const totalCost = totalGoodsCost;
 
     // Check constraints
     const feasibilityIssues: string[] = [];
     let isFeasible = true;
+    if (bestSegments.some(segment => segment.transitUnavailable)) {
+      isFeasible = false;
+      feasibilityIssues.push('No transit connection found for part of this trip. Choose another transportation mode.');
+    }
 
     if (tripContext.maxBudget && totalCost > tripContext.maxBudget) {
       isFeasible = false;
@@ -283,7 +294,7 @@ export function optimizeShoppingPlan(
       routeStops: bestPermutation,
       routeSegments: bestSegments,
       totalGoodsCost,
-      totalTripCost: 0,
+      totalTripCost: totalTransitCost,
       totalCost,
       totalTravelMinutes: bestTravelMinutes,
       totalShoppingMinutes,

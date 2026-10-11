@@ -26,10 +26,10 @@ export const Header: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="font-bold text-base text-brand-darkgreen">
-                    Zero Paid APIs & Architecture Transparency
+                    About the data
                   </h3>
                   <p className="text-xs text-brand-muted">
-                    100% Free & Open-Source Local Implementation
+                    Sample prices and estimated travel times
                   </p>
                 </div>
               </div>
@@ -45,7 +45,7 @@ export const Header: React.FC = () => {
               <div className="p-3 bg-brand-peachlight rounded-xl border border-brand-peach/30 text-xs text-brand-text flex items-start gap-2">
                 <Info className="w-4 h-4 text-brand-orange mt-0.5 shrink-0" />
                 <p>
-                  <strong>No Paid Services Used:</strong> This application complies strictly with zero paid service rules. All maps use OpenStreetMap with Leaflet. All routing uses a deterministic local multimodal transit graph. All prices & availability are transparently labeled demo estimates.
+                  <strong>Data sources:</strong> Maps use OpenStreetMap. Walking, cycling and driving paths use OSRM when available, with estimated paths offline. Travel times and transit connections use a local model, not live schedules. Prices and availability are samples. Optional AI parsing uses your configured provider.
                 </p>
               </div>
 

@@ -18,13 +18,12 @@ export function calculateIngredientShortfalls(
 ): IngredientRequirement[] {
   const mergedMap = new Map<string, IngredientRequirement>();
 
-  // 1. Process Recipe Intents
+  // 1. Process Recipe Intents (Both Predefined & Custom)
   for (const intent of intents) {
-    if (intent.type === 'recipe' && intent.recipeId) {
-      const recipe = getRecipeById(intent.recipeId);
-      if (!recipe) continue;
-
-      const servings = intent.servings || recipe.defaultServings;
+    if (intent.type === 'recipe') {
+      const recipe = intent.recipeId ? getRecipeById(intent.recipeId) : undefined;
+      const displayName = recipe?.name || intent.recipeName || 'Custom Dish';
+      const servings = intent.servings || recipe?.defaultServings || 2;
       const scaledIngredients = getIntentIngredients(intent);
 
       for (const ing of scaledIngredients) {
@@ -37,7 +36,7 @@ export function calculateIngredientShortfalls(
           existing.totalRequired += convertedQty;
           existing.sourceContributions.push({
             sourceId: intent.id,
-            sourceName: `${recipe.name} (${servings} servings)`,
+            sourceName: `${displayName} (${servings} servings)`,
             quantity: convertedQty
           });
         } else {
@@ -52,7 +51,7 @@ export function calculateIngredientShortfalls(
             sourceContributions: [
               {
                 sourceId: intent.id,
-                sourceName: `${recipe.name} (${servings} servings)`,
+                sourceName: `${displayName} (${servings} servings)`,
                 quantity: ing.quantity
               }
             ],

@@ -70,9 +70,9 @@ export class ServiceIntegrationsCatalog {
       id: 'llm_assistant',
       name: 'Gemini / LLM Intent Engine',
       category: 'Multimodal Natural Language',
-      status: 'Deterministic Rule Parser Active',
+      status: 'Local Parser / Optional AI',
       pricing: 'Optional BYO Key or Free Tier',
-      currentMode: 'Deterministic Rule Parser & Alias Matcher'
+      currentMode: 'Local rules by default; optional configured LLM with local fallback'
     }
   ];
 }

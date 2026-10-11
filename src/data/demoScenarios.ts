@@ -20,19 +20,19 @@ export interface DemoScenario {
 export const DEMO_SCENARIOS: DemoScenario[] = [
   {
     id: 'scenario_a',
-    name: 'Scenario A: Cooking Tonight',
-    tag: 'Recipe Decomposition & Specialty Store',
-    badge: 'Dual Recipe',
-    inputPrompt: 'I want to cook mapo tofu and tomato egg stir-fry for two people.',
-    description: 'Combines two recipes requiring common staples (eggs, scallions, oil) and authentic specialty items (Pixian doubanjiang, Sichuan peppercorn).',
+    name: 'Scenario A: Weeknight Dinner & Essentials',
+    tag: 'Recipe Decomposition & Multi-Category Optimization',
+    badge: 'Dinner + Essentials',
+    inputPrompt: 'I want to cook spaghetti bolognese for two people and I need paper towels.',
+    description: 'Combines a classic Italian dinner recipe (pasta, ground beef, tomatoes, onion) with household paper products across supermarkets and retail stores.',
     keyFeatures: [
-      'Decomposes 2 recipes into 10 structured ingredients',
-      'Merges shared ingredients (scallions: 2+2=4 pieces, oil: 30+20=50ml)',
-      'Deducts available pantry stock (3 eggs, 500ml oil, 2 garlic cloves)',
-      'Automatically selects specialty Asian grocery for authentic ingredients'
+      'Decomposes Spaghetti Bolognese into structured ingredients',
+      'Merges recipe shortfalls with direct household purchase (paper towels)',
+      'Deducts available pantry stock (garlic, cooking oil, salt)',
+      'Demonstrates sharp distinction between Save Time (single-stop) and Save Money (multi-stop value split)'
     ],
     settings: {
-      transportMode: 'walking',
+      transportMode: 'driving',
       optimizationMode: 'balanced',
       originId: 'meadowmont_apts',
       destinationMode: 'return_to_origin'
@@ -97,6 +97,26 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
       originId: 'patterson_place',
       destinationMode: 'finish_at_last_store',
       excludedStoreIds: ['store_walmart']
+    }
+  },
+  {
+    id: 'scenario_e',
+    name: 'Scenario E: Specialty Asian Cooking',
+    tag: 'Recipe Decomposition & Specialty Store',
+    badge: 'Dual Recipe',
+    inputPrompt: 'I want to cook mapo tofu and tomato egg stir-fry for two people.',
+    description: 'Combines two recipes requiring common staples (eggs, scallions, oil) and authentic specialty items (Pixian doubanjiang, Sichuan peppercorn).',
+    keyFeatures: [
+      'Decomposes 2 recipes into 10 structured ingredients',
+      'Merges shared ingredients (scallions, oil)',
+      'Deducts available pantry stock',
+      'Automatically selects specialty Asian grocery for authentic items'
+    ],
+    settings: {
+      transportMode: 'driving',
+      optimizationMode: 'balanced',
+      originId: 'meadowmont_apts',
+      destinationMode: 'return_to_origin'
     }
   }
 ];

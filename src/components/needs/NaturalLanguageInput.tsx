@@ -1,33 +1,49 @@
 import React, { useState } from 'react';
-import { Search, Plus, Sparkles, ChefHat, Check } from 'lucide-react';
+import { Search, Plus, Sparkles, ChefHat, Check, Loader2 } from 'lucide-react';
 import { PREDEFINED_RECIPES } from '../../data/recipes';
 
 interface NaturalLanguageInputProps {
-  onAddInput: (text: string) => { explanation: string };
+  onAddInput: (text: string) => Promise<{ explanation: string; unrecognizedDish?: string }> | { explanation: string; unrecognizedDish?: string };
   lastNotification: string | null;
+  onOpenCustomModal?: (dishName?: string) => void;
+  isParsing?: boolean;
 }
 
 export const NaturalLanguageInput: React.FC<NaturalLanguageInputProps> = ({
   onAddInput,
-  lastNotification
+  lastNotification,
+  onOpenCustomModal,
+  isParsing = false
 }) => {
   const [inputText, setInputText] = useState('');
   const [justAdded, setJustAdded] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputText.trim()) return;
+    if (!inputText.trim() || isSubmitting || isParsing) return;
 
-    onAddInput(inputText);
-    setInputText('');
-    setJustAdded(true);
-    setTimeout(() => setJustAdded(false), 2500);
+    setIsSubmitting(true);
+    try {
+      await onAddInput(inputText);
+      setInputText('');
+      setJustAdded(true);
+      setTimeout(() => setJustAdded(false), 2500);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleQuickAdd = (text: string) => {
-    onAddInput(text);
-    setJustAdded(true);
-    setTimeout(() => setJustAdded(false), 2500);
+  const handleQuickAdd = async (text: string) => {
+    if (isSubmitting || isParsing) return;
+    setIsSubmitting(true);
+    try {
+      await onAddInput(text);
+      setJustAdded(true);
+      setTimeout(() => setJustAdded(false), 2500);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -59,14 +75,19 @@ export const NaturalLanguageInput: React.FC<NaturalLanguageInputProps> = ({
         <div className="absolute right-2.5 bottom-3">
           <button
             type="submit"
-            disabled={!inputText.trim()}
+            disabled={!inputText.trim() || isSubmitting || isParsing}
             className={`px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm ${
-              inputText.trim()
+              inputText.trim() && !isSubmitting && !isParsing
                 ? 'bg-brand-primary text-white hover:bg-brand-darkgreen active:scale-95'
                 : 'bg-stone-200 text-stone-400 cursor-not-allowed'
             }`}
           >
-            {justAdded ? (
+            {isSubmitting || isParsing ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-stone-500" />
+                <span>Thinking...</span>
+              </>
+            ) : justAdded ? (
               <>
                 <Check className="w-3.5 h-3.5 text-emerald-300" />
                 <span>Added!</span>
@@ -83,9 +104,20 @@ export const NaturalLanguageInput: React.FC<NaturalLanguageInputProps> = ({
 
       {/* Parsing feedback message */}
       {lastNotification && (
-        <div className="mt-2 text-[11px] px-2.5 py-1.5 rounded-lg bg-brand-subtle text-brand-darkgreen border border-brand-border/60 flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-brand-primary shrink-0"></span>
-          <span role="status">{lastNotification}</span>
+        <div className="mt-2 text-[11px] px-2.5 py-1.5 rounded-lg bg-brand-subtle text-brand-darkgreen border border-brand-border/60 flex items-center justify-between gap-1.5">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-brand-primary shrink-0"></span>
+            <span role="status" className="truncate">{lastNotification}</span>
+          </div>
+          {onOpenCustomModal && lastNotification.includes('Custom Dish') && (
+            <button
+              type="button"
+              onClick={() => onOpenCustomModal()}
+              className="shrink-0 px-2 py-0.5 rounded bg-brand-primary text-white font-bold text-[10px] hover:bg-brand-darkgreen transition-colors"
+            >
+              + Add Dish
+            </button>
+          )}
         </div>
       )}
 
@@ -96,12 +128,35 @@ export const NaturalLanguageInput: React.FC<NaturalLanguageInputProps> = ({
           Quick Add Recipes & Essentials:
         </div>
         <div className="flex flex-wrap gap-1.5">
+          {onOpenCustomModal && (
+            <button
+              type="button"
+              onClick={() => onOpenCustomModal()}
+              className="text-[11px] px-2 py-1 rounded-md bg-emerald-50 hover:bg-emerald-100 text-brand-darkgreen border border-brand-sage transition-colors font-bold flex items-center gap-1 shadow-xs"
+            >
+              <Plus className="w-3 h-3 text-brand-primary" /> Custom Dish
+            </button>
+          )}
           <button
             type="button"
             onClick={() => handleQuickAdd('Make mapo tofu for 2')}
             className="text-[11px] px-2 py-1 rounded-md bg-brand-canvas hover:bg-brand-lightgreen text-brand-text border border-brand-border transition-colors font-medium"
           >
             + Mapo Tofu
+          </button>
+          <button
+            type="button"
+            onClick={() => handleQuickAdd('Make beef stew for 2')}
+            className="text-[11px] px-2 py-1 rounded-md bg-brand-canvas hover:bg-brand-lightgreen text-brand-text border border-brand-border transition-colors font-medium"
+          >
+            + Beef Stew
+          </button>
+          <button
+            type="button"
+            onClick={() => handleQuickAdd('Make kung pao chicken for 2')}
+            className="text-[11px] px-2 py-1 rounded-md bg-brand-canvas hover:bg-brand-lightgreen text-brand-text border border-brand-border transition-colors font-medium"
+          >
+            + Kung Pao Chicken
           </button>
           <button
             type="button"
