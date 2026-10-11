@@ -265,7 +265,10 @@ export function optimizeShoppingPlan(
     const shoppingMinutesPerStore = 12;
     const totalShoppingMinutes = actuallyUsedStores.length * shoppingMinutesPerStore;
     const totalTripMinutes = bestTravelMinutes + totalShoppingMinutes;
-    const totalCost = totalGoodsCost;
+    const totalTransitCost = tripContext.transportMode === 'transit'
+      ? Math.round(bestSegments.reduce((acc, s) => acc + (s.transitFare || 0), 0) * 100) / 100
+      : 0;
+    const totalCost = Math.round((totalGoodsCost + totalTransitCost) * 100) / 100;
 
     // Check constraints
     const feasibilityIssues: string[] = [];
@@ -283,7 +286,7 @@ export function optimizeShoppingPlan(
       routeStops: bestPermutation,
       routeSegments: bestSegments,
       totalGoodsCost,
-      totalTripCost: 0,
+      totalTripCost: totalTransitCost,
       totalCost,
       totalTravelMinutes: bestTravelMinutes,
       totalShoppingMinutes,

@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import { ShoppingPlan, TripContext, Store } from '../../types';
 import { DEMO_STORES } from '../../data/stores';
+import { fetchRealRoadGeometry } from '../../data/travelGraph';
 
 const escapeHtml = (value: string) => value.replace(/[&<>"']/g, char => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[char]!));
 interface MapViewProps {
@@ -164,10 +165,21 @@ export const MapView: React.FC<MapViewProps> = ({
 
         segment.geometry.forEach((pt) => bounds.extend(pt));
 
-        polyline.bindTooltip(
-          `Leg ${idx + 1}: ${escapeHtml(segment.fromName)} → ${escapeHtml(segment.toName)} (${segment.durationMinutes} min, ${(segment.distanceMeters / 1000).toFixed(1)} km)`,
-          { sticky: true }
-        );
+        const tooltipContent =
+          tripContext.transportMode === 'transit' && segment.transitRouteName
+            ? `<strong>Leg ${idx + 1} (Bus):</strong> ${escapeHtml(segment.transitRouteName)} (${segment.durationMinutes} min${segment.transitFare !== undefined ? ` · ${segment.transitFare === 0 ? 'Free' : '$' + segment.transitFare.toFixed(2)}` : ''})<br/><span style="font-size: 10px; color: #4B5563;">Board: ${escapeHtml(segment.boardingStop || '')} → ${escapeHtml(segment.debarkingStop || '')}${segment.transferStop ? '<br/>🔄 Transfer: ' + escapeHtml(segment.transferStop) : ''}${segment.firstMileWalkMeters && segment.firstMileWalkMeters > 150 ? '<br/>🚶 Walk to stop: ' + Math.round(segment.firstMileWalkMeters) + 'm' : ''}</span>`
+            : `Leg ${idx + 1}: ${escapeHtml(segment.fromName)} → ${escapeHtml(segment.toName)} (${segment.durationMinutes} min, ${(segment.distanceMeters / 1000).toFixed(1)} km)`;
+
+        polyline.bindTooltip(tooltipContent, { sticky: true });
+
+        // Asynchronously fetch real turn-by-turn road network coordinates from OSRM
+        fetchRealRoadGeometry(segment.fromCoords, segment.toCoords, tripContext.transportMode)
+          .then((realCoords) => {
+            if (realCoords && realCoords.length > 1) {
+              polyline.setLatLngs(realCoords);
+            }
+          })
+          .catch(() => {});
       });
     }
 
@@ -185,9 +197,15 @@ export const MapView: React.FC<MapViewProps> = ({
       <div className="absolute bottom-7 left-3 z-[20] bg-white/95 backdrop-blur-sm px-3 py-2 rounded-xl border border-brand-border shadow-soft text-[11px] space-y-1">
         <div className="font-bold text-brand-darkgreen flex items-center gap-1.5">
           <span>Chapel Hill / Durham Route</span>
-          <span className="text-[9px] px-1.5 py-0.2 rounded bg-brand-subtle text-brand-muted">
-            Simulated Graph
-          </span>
+          {tripContext.transportMode === 'transit' ? (
+            <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 font-bold border border-blue-300">
+              GoTriangle & CHT Bus Lines
+            </span>
+          ) : (
+            <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">
+              OSRM Real Road Network
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-3 text-stone-600">
           <div className="flex items-center gap-1">

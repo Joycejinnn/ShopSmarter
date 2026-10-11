@@ -6,6 +6,7 @@ import { scaleRecipeIngredients, getRecipeById } from '../services/recipeService
 import { incorporatePurchasedItemsIntoPantry } from '../services/pantryService';
 import { PantryItem, ShoppingIntent, TripContext } from '../types';
 import { DEMO_ORIGIN_LOCATIONS } from '../data/stores';
+import { resolveTransitRouteDetails, findNearestTransitStop, getRouteSegment } from '../data/travelGraph';
 
 describe('Shopsmarter Core Logic & Verification Suite', () => {
   const dummyOrigin = {
@@ -479,5 +480,42 @@ describe('Shopsmarter Core Logic & Verification Suite', () => {
     expect(timePlan.isFeasible).toBe(true);
     expect(moneyPlan.totalCost).toBeLessThanOrEqual(timePlan.totalCost);
     expect(timePlan.totalTripMinutes).toBeLessThanOrEqual(moneyPlan.totalTripMinutes);
+  });
+
+  // Test 16: Multi-zone transit network connects Carrboro via CHT Route J and transfers to GoTriangle 400
+  it('Carrboro origin routes via CHT Route J and transfers at Franklin St Hub to GoTriangle 400 for Durham destinations', () => {
+    // Carrboro Town Center (Weaver St) -> Target (Durham)
+    const carrboroCoords: [number, number] = [35.9105, -79.0755];
+    const targetCoords: [number, number] = [35.9525, -78.9616];
+
+    const nearestStop = findNearestTransitStop(carrboroCoords);
+    expect(nearestStop.zone).toBe('Carrboro');
+    expect(nearestStop.routes.includes('CHT Route J')).toBe(true);
+
+    const routeDetails = resolveTransitRouteDetails(carrboroCoords, targetCoords);
+    expect(routeDetails.transferStop).toBeDefined();
+    expect(routeDetails.transferStop).toContain('Downtown Hub');
+    expect(routeDetails.routeName).toContain('CHT Route J');
+    expect(routeDetails.routeName).toContain('GoTriangle 400');
+    expect(routeDetails.fare).toBe(2.25); // $0 CHT + $2.25 GoTriangle
+
+    const segment = getRouteSegment('Carrboro Home', carrboroCoords, 'Target', targetCoords, 'transit');
+    expect(segment.transitFare).toBe(2.25);
+    expect(segment.transferStop).toBeDefined();
+    expect(segment.durationMinutes).toBeGreaterThanOrEqual(25);
+  });
+
+  // Test 17: MLK Jr Blvd and North Chapel Hill routes are fare-free ($0.00) within town limits
+  it('North Chapel Hill and Timberlyne transit routing within town is fare-free ($0.00)', () => {
+    // Chapel Hill North (Homestead Rd) -> Eastgate (Trader Joe's)
+    const northCoords: [number, number] = [35.9555, -79.0570];
+    const eastgateCoords: [number, number] = [35.9367, -79.0244];
+
+    const nearestStop = findNearestTransitStop(northCoords);
+    expect(nearestStop.zone).toBe('North Chapel Hill');
+
+    const routeDetails = resolveTransitRouteDetails(northCoords, eastgateCoords);
+    expect(routeDetails.fare).toBe(0.00); // 100% Fare-Free CHT
+    expect(routeDetails.firstMileWalkMeters).toBeLessThanOrEqual(200);
   });
 });

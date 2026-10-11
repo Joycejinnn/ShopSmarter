@@ -169,6 +169,14 @@ export interface RouteSegment {
   transportMode: TransportationMode;
   transitFare?: number;
   transitDetails?: string;
+  transitRouteName?: string;
+  boardingStop?: string;
+  debarkingStop?: string;
+  transferStop?: string;
+  transferRouteName?: string;
+  firstMileWalkMeters?: number;
+  firstMileWalkMinutes?: number;
+  isTransitDesert?: boolean;
   geometry: [number, number][]; // lat/lng path points
 }
 
