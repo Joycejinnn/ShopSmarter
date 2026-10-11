@@ -67,7 +67,7 @@ export const TRANSPORT_MODES_CONFIG: Record<
     speedKmh: 22.0, // Bus transit including stops
     comfortMaxDistanceKm: 25.0,
     icon: 'Bus',
-    description: 'Simulated travel time only. Transit routes and fares are not verified.'
+    description: 'Plan trips between stores using public transit.'
   },
   cycling: {
     name: 'Cycling',

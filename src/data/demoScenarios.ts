@@ -66,7 +66,7 @@ export const DEMO_SCENARIOS: DemoScenario[] = [
     inputPrompt: 'I need jasmine rice, soft tofu, dish soap, and laundry detergent. I am taking public transit.',
     description: 'Models a car-free urban shopper traveling via regional transit.',
     keyFeatures: [
-      'Simulated transit travel times; routes and fares are not verified',
+      'Includes route, stop, and transfer guidance',
       'Shows estimated purchase weight',
       'Includes full package weights for rice and detergent',
       'Estimates a multi-stop shopping trip'

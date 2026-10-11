@@ -177,7 +177,7 @@ export function App() {
       <Header />
 
       <main id="main-content" className="flex-1">
-        <div className="page-intro"><div><p className="eyebrow">LESS PLANNING. BETTER SHOPPING.</p><h1>Your next shop, simplified.</h1><p>Bring your list. We’ll bring it together.</p></div><span className="demo-note">Demo prices & simulated routes</span></div>
+        <div className="page-intro"><div><p className="eyebrow">LESS PLANNING. BETTER SHOPPING.</p><h1>Your next shop, simplified.</h1><p>Bring your list. We’ll bring it together.</p></div></div>
         <ThreePanelLayout
           leftPanel={leftPanel}
           centerPanel={centerPanel}

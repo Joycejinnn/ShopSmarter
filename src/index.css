@@ -56,14 +56,10 @@
 .header-inner { max-width: 1120px; margin: auto; min-height: 76px; padding: 16px 28px; display:flex; justify-content:space-between; align-items:center; gap:16px; }
 .wordmark { display:flex; align-items:center; gap:10px; font-size:21px; font-weight:800; letter-spacing:-.8px; color:#1b4332; }
 .brand-dot { color:#e76f51; margin-left:-8px; }
-.header-tools { display:flex; align-items:center; gap:16px; font-size:13px; color:#515c54; }
-.header-tools select { background:transparent; max-width:190px; padding:10px 4px; }
-.about-button { display:flex; align-items:center; gap:7px; min-height:44px; }
 .page-intro { max-width:1064px; margin:40px auto 24px; display:flex; align-items:flex-end; justify-content:space-between; gap:20px; }
 .eyebrow { font-size:11px; font-weight:700; letter-spacing:1.5px; color:#57725c; margin-bottom:10px; }
 .page-intro h1 { font-size:clamp(26px,4vw,36px); font-weight:750; letter-spacing:-1.2px; line-height:1.2; color:#1b4332; }
 .page-intro h1 + p { margin-top:10px; color:#687168; font-size:15px; }
-.demo-note { font-size:12px; color:#687168; }
 .input-wrap, .workspace { max-width:1064px; margin:auto; }
 .input-wrap > div { padding:22px; box-shadow:none; }
 .input-wrap label { font-size:15px; text-transform:none; letter-spacing:0; }
@@ -92,11 +88,9 @@ summary span { font-size:12px; font-weight:400; color:#657063; margin-left:12px;
 @media(max-width:1120px) { .page-intro,.input-wrap,.workspace { margin-left:24px; margin-right:24px; } }
 @media(max-width:700px) {
   .header-inner { padding:12px 18px; flex-wrap:wrap; gap:8px; }
-  .header-tools { gap:12px; font-size:12px; }
   .wordmark { font-size:19px; }
   .page-intro,.input-wrap,.workspace { margin-left:16px; margin-right:16px; }
   .page-intro { margin-top:28px; display:block; }
-  .demo-note { display:block; margin-top:12px; }
   .input-wrap > div { padding:16px; }
   .workspace-nav { gap:8px; justify-content:space-between; }
   .workspace-nav button { font-size:12px; gap:6px; }
