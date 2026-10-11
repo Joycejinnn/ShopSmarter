@@ -59,6 +59,7 @@ export interface ShoppingIntent {
   type: 'recipe' | 'direct_item';
   recipeId?: string;
   recipeName?: string;
+  ingredientOverrides?: { servings: number; ingredients: RecipeIngredient[] };
   servings?: number;
   directItem?: DirectItemIntent;
   rawText?: string;

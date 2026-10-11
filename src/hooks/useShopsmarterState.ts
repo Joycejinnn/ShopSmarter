@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   ShoppingIntent,
+  RecipeIngredient,
   PantryItem,
   TripContext,
   ShoppingPlan,
@@ -89,6 +90,15 @@ export function useShopsmarterState() {
     setIntents((prev) =>
       prev.map((i) => (i.id === intentId ? { ...i, servings: Math.max(1, newServings) } : i))
     );
+  }, []);
+
+  const updateRecipeIngredients = useCallback((intentId: string, ingredients: RecipeIngredient[] | null) => {
+    setIntents(prev => prev.map(intent => intent.id === intentId ? {
+      ...intent,
+      ingredientOverrides: ingredients === null ? undefined : {
+        servings: intent.servings || 2, ingredients
+      }
+    } : intent));
   }, []);
 
   const clearAllIntents = useCallback(() => {
@@ -245,6 +255,7 @@ export function useShopsmarterState() {
     addFromNaturalLanguage,
     removeIntent,
     updateServings,
+    updateRecipeIngredients,
     clearAllIntents,
     updatePantry,
     deletePantryItem,

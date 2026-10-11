@@ -6,7 +6,7 @@ import {
   ProductOffer,
   Product
 } from '../types';
-import { getRecipeById, scaleRecipeIngredients } from '../services/recipeService';
+import { getRecipeById, getIntentIngredients } from '../services/recipeService';
 import { normalizeIngredientName, areUnitsCompatible, convertQuantity } from '../services/ingredientNormalizer';
 import { PRODUCTS } from '../data/products';
 import { PRODUCT_OFFERS } from '../data/productOffers';
@@ -25,7 +25,7 @@ export function calculateIngredientShortfalls(
       if (!recipe) continue;
 
       const servings = intent.servings || recipe.defaultServings;
-      const scaledIngredients = scaleRecipeIngredients(recipe, servings);
+      const scaledIngredients = getIntentIngredients(intent);
 
       for (const ing of scaledIngredients) {
         const normId = ing.ingredientId || normalizeIngredientName(ing.name);

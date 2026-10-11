@@ -28,6 +28,7 @@ export function App() {
     addFromNaturalLanguage,
     removeIntent,
     updateServings,
+    updateRecipeIngredients,
     clearAllIntents,
     updatePantry,
     deletePantryItem,
@@ -54,6 +55,7 @@ export function App() {
         intents={intents}
         onRemoveIntent={removeIntent}
         onUpdateServings={updateServings}
+        onUpdateRecipeIngredients={updateRecipeIngredients}
         onClearAll={clearAllIntents}
       />
       <details className="disclosure"><summary>My pantry <span>{pantryItems.length} items · edit inventory</span></summary><div className="pt-4">
