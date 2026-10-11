@@ -60,6 +60,18 @@ export const DEMO_STORES: Store[] = [
     openingHours: '9:00 AM - 9:00 PM',
     demoNote: 'Specialty Asian grocery: fresh tofu, doubanjiang, Sichuan peppercorn, Asian greens, specialty sauces.',
     color: '#2A9D8F' // Jade green
+  },
+  {
+    id: 'store_trader_joes',
+    name: "Trader Joe's (Eastgate Crossing)",
+    category: 'supermarket',
+    address: '1800 E Franklin St, Chapel Hill, NC',
+    city: 'Chapel Hill',
+    lat: 35.9315,
+    lng: -79.0275,
+    openingHours: '8:00 AM - 9:00 PM',
+    demoNote: 'Neighborhood favorite for affordable organic produce, private-label staples, and specialty items.',
+    color: '#D9381E' // Trader Joe's red
   }
 ];
 

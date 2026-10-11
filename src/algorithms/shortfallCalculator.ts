@@ -18,14 +18,26 @@ export function calculateIngredientShortfalls(
 ): IngredientRequirement[] {
   const mergedMap = new Map<string, IngredientRequirement>();
 
-  // 1. Process Recipe Intents
+  // 1. Process Recipe Intents (Both Predefined & Custom)
   for (const intent of intents) {
-    if (intent.type === 'recipe' && intent.recipeId) {
-      const recipe = getRecipeById(intent.recipeId);
-      if (!recipe) continue;
+    if (intent.type === 'recipe') {
+      let scaledIngredients: { ingredientId: string; name: string; quantity: number; unit: string; category: any }[] = [];
+      let displayName = intent.recipeName || 'Custom Dish';
+      const servings = intent.servings || 2;
 
-      const servings = intent.servings || recipe.defaultServings;
-      const scaledIngredients = scaleRecipeIngredients(recipe, servings);
+      if (intent.customIngredients && intent.customIngredients.length > 0) {
+        const scaleRatio = servings / 2;
+        scaledIngredients = intent.customIngredients.map((ing) => ({
+          ...ing,
+          quantity: Math.round(ing.quantity * scaleRatio * 100) / 100
+        }));
+      } else if (intent.recipeId) {
+        const recipe = getRecipeById(intent.recipeId);
+        if (recipe) {
+          displayName = recipe.name;
+          scaledIngredients = scaleRecipeIngredients(recipe, servings);
+        }
+      }
 
       for (const ing of scaledIngredients) {
         const normId = ing.ingredientId || normalizeIngredientName(ing.name);
@@ -37,7 +49,7 @@ export function calculateIngredientShortfalls(
           existing.totalRequired += convertedQty;
           existing.sourceContributions.push({
             sourceId: intent.id,
-            sourceName: `${recipe.name} (${servings} servings)`,
+            sourceName: `${displayName} (${servings} servings)`,
             quantity: convertedQty
           });
         } else {
@@ -52,7 +64,7 @@ export function calculateIngredientShortfalls(
             sourceContributions: [
               {
                 sourceId: intent.id,
-                sourceName: `${recipe.name} (${servings} servings)`,
+                sourceName: `${displayName} (${servings} servings)`,
                 quantity: ing.quantity
               }
             ],

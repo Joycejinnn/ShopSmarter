@@ -383,4 +383,101 @@ describe('Shopsmarter Core Logic & Verification Suite', () => {
     expect(plan.totalTripCost).toBe(0);
     expect(plan.totalCost).toBe(plan.totalGoodsCost);
   });
+
+  // Test 13: Heuristic ingredient extraction (Option 1)
+  it('Heuristic ingredient extraction dynamically extracts ingredients for uncatalogued cooking requests', () => {
+    const parse = parseNaturalLanguageInput('I want to cook chicken with potatoes and onions for 2 people.');
+    expect(parse.intents.length).toBe(1);
+    const customRecipe = parse.intents[0];
+    expect(customRecipe.type).toBe('recipe');
+    expect(customRecipe.customIngredients).toBeDefined();
+    expect(customRecipe.customIngredients?.length).toBeGreaterThanOrEqual(2);
+    expect(customRecipe.customIngredients?.some((i) => i.ingredientId === 'ing_chicken_thighs')).toBe(true);
+    expect(customRecipe.customIngredients?.some((i) => i.ingredientId === 'ing_potatoes')).toBe(true);
+  });
+
+  // Test 14: Custom recipe shortfalls and store allocation (Option 3)
+  it('Custom recipe intents correctly calculate shortfalls, scale servings, and allocate to stores', () => {
+    const customIntent: ShoppingIntent = {
+      id: 'int_custom_ratatouille',
+      type: 'recipe',
+      recipeName: 'Ratatouille',
+      servings: 4, // 4 servings
+      customIngredients: [
+        {
+          ingredientId: 'ing_tomatoes',
+          name: 'Tomatoes',
+          quantity: 2, // 2 per 2 servings -> 4 for 4 servings
+          unit: 'piece',
+          category: 'Vegetables'
+        },
+        {
+          ingredientId: 'ing_garlic',
+          name: 'Garlic',
+          quantity: 2, // 2 per 2 servings -> 4 for 4 servings
+          unit: 'clove',
+          category: 'Vegetables'
+        }
+      ],
+      createdAt: ''
+    };
+
+    const pantry: PantryItem[] = [
+      {
+        id: 'p_garlic',
+        ingredientId: 'ing_garlic',
+        name: 'Garlic',
+        quantity: 2,
+        unit: 'clove',
+        category: 'Vegetables',
+        updatedAt: ''
+      }
+    ];
+
+    const shortfalls = calculateIngredientShortfalls([customIntent], pantry);
+    const tomatoReq = shortfalls.find((r) => r.ingredientId === 'ing_tomatoes');
+    const garlicReq = shortfalls.find((r) => r.ingredientId === 'ing_garlic');
+
+    expect(tomatoReq?.totalRequired).toBe(4); // 2 * (4/2) = 4
+    expect(tomatoReq?.shortfall).toBe(4);
+    expect(garlicReq?.totalRequired).toBe(4); // 2 * (4/2) = 4
+    expect(garlicReq?.shortfall).toBe(2); // 4 - 2 pantry = 2
+
+    const plan = optimizeShoppingPlan(shortfalls, defaultTripContext, 'balanced');
+    expect(plan.isFeasible).toBe(true);
+    expect(plan.storeAllocations.length).toBeGreaterThan(0);
+  });
+
+  // Test 15: Default launch scenario (Spaghetti Bolognese + Paper Towels) exhibits distinct trade-offs
+  it('Default launch scenario exhibits distinct trade-offs between Save Time and Save Money', () => {
+    const parse = parseNaturalLanguageInput('I want to cook spaghetti bolognese for two people and I need paper towels.');
+    expect(parse.intents.length).toBe(2);
+
+    const pantry: PantryItem[] = [
+      {
+        id: 'p_garlic',
+        ingredientId: 'ing_garlic',
+        name: 'Garlic',
+        quantity: 2,
+        unit: 'clove',
+        category: 'Vegetables',
+        updatedAt: ''
+      }
+    ];
+
+    const shortfalls = calculateIngredientShortfalls(parse.intents, pantry);
+    const drivingContext: TripContext = {
+      ...defaultTripContext,
+      transportMode: 'driving',
+      maxStops: 2
+    };
+
+    const moneyPlan = optimizeShoppingPlan(shortfalls, drivingContext, 'money');
+    const timePlan = optimizeShoppingPlan(shortfalls, drivingContext, 'time');
+
+    expect(moneyPlan.isFeasible).toBe(true);
+    expect(timePlan.isFeasible).toBe(true);
+    expect(moneyPlan.totalCost).toBeLessThanOrEqual(timePlan.totalCost);
+    expect(timePlan.totalTripMinutes).toBeLessThanOrEqual(moneyPlan.totalTripMinutes);
+  });
 });

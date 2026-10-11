@@ -69,9 +69,9 @@ export const ActiveNeedsList: React.FC<ActiveNeedsListProps> = ({
                     </span>
                   </div>
                   <div className="text-[11px] text-brand-muted flex flex-wrap items-center gap-2 mt-0.5">
-                    <span>{recipe?.cuisine}</span>
+                    <span>{recipe?.cuisine || (intent.customIngredients ? 'Custom Recipe' : 'Recipe')}</span>
                     <span>•</span>
-                    <span>{recipe?.ingredients.length || 0} ingredients</span>
+                    <span>{recipe?.ingredients.length || intent.customIngredients?.length || 0} ingredients</span>
                   </div>
                 </div>
 

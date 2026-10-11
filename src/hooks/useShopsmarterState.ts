@@ -7,12 +7,14 @@ import {
   OptimizationPriority,
   TransportationMode,
   LocationPoint,
-  ShoppingSession
+  ShoppingSession,
+  LLMConfig
 } from '../types';
 import { loadPantryFromStorage, savePantryToStorage, addOrUpdatePantryItem, removePantryItem as removePantryItemService, incorporatePurchasedItemsIntoPantry, resetPantryToDefault } from '../services/pantryService';
 import { calculateIngredientShortfalls } from '../algorithms/shortfallCalculator';
 import { optimizeShoppingPlan } from '../algorithms/storeOptimizer';
-import { parseNaturalLanguageInput } from '../services/intentParser';
+import { parseNaturalLanguageInput, createCustomRecipeIntent } from '../services/intentParser';
+import { parseNaturalLanguageWithLLM, getLLMConfig, saveLLMConfig } from '../services/llmParser';
 import { DEMO_ORIGIN_LOCATIONS } from '../data/stores';
 import { DEMO_SCENARIOS } from '../data/demoScenarios';
 
@@ -27,8 +29,8 @@ const DEFAULT_ORIGIN: LocationPoint = {
 export function useShopsmarterState() {
   // 1. Intents
   const [intents, setIntents] = useState<ShoppingIntent[]>(() => {
-    // Start with pre-parsed Scenario A (Cooking tonight: Mapo tofu & Tomato egg)
-    const initial = parseNaturalLanguageInput('I want to cook mapo tofu and tomato egg stir-fry for two people.');
+    // Start with pre-parsed Scenario A (Weeknight Dinner: Spaghetti Bolognese & Paper Towels)
+    const initial = parseNaturalLanguageInput('I want to cook spaghetti bolognese for two people and I need paper towels.');
     return initial.intents;
   });
 
@@ -39,7 +41,7 @@ export function useShopsmarterState() {
   const [tripContext, setTripContext] = useState<TripContext>({
     origin: DEFAULT_ORIGIN,
     destinationMode: 'return_to_origin',
-    transportMode: 'walking',
+    transportMode: 'driving',
     maxStops: 2,
     excludedStoreIds: []
   });
@@ -57,6 +59,13 @@ export function useShopsmarterState() {
   });
 
   const [lastNotification, setLastNotification] = useState<string | null>(null);
+  const [llmConfig, setLlmConfigState] = useState<LLMConfig>(() => getLLMConfig());
+  const [isParsingLLM, setIsParsingLLM] = useState<boolean>(false);
+
+  const updateLLMConfig = useCallback((newConfig: Partial<LLMConfig>) => {
+    const updated = saveLLMConfig(newConfig);
+    setLlmConfigState(updated);
+  }, []);
 
   // Derived: Ingredient Shortfalls
   const requirements = useMemo(() => {
@@ -69,16 +78,21 @@ export function useShopsmarterState() {
   }, [requirements, tripContext, optimizationMode]);
 
   // Actions: Intents
-  const addFromNaturalLanguage = useCallback((input: string) => {
-    const res = parseNaturalLanguageInput(input);
-    if (res.intents.length > 0) {
-      setIntents((prev) => [...prev, ...res.intents]);
-      setLastNotification(res.explanation);
-    } else {
-      setLastNotification(res.explanation);
+  const addFromNaturalLanguage = useCallback(async (input: string) => {
+    setIsParsingLLM(true);
+    try {
+      const res = await parseNaturalLanguageWithLLM(input, llmConfig);
+      if (res.intents.length > 0) {
+        setIntents((prev) => [...prev, ...res.intents]);
+        setLastNotification(res.explanation);
+      } else {
+        setLastNotification(res.explanation);
+      }
+      return res;
+    } finally {
+      setIsParsingLLM(false);
     }
-    return res;
-  }, []);
+  }, [llmConfig]);
 
   const removeIntent = useCallback((id: string) => {
     setIntents((prev) => prev.filter((i) => i.id !== id));
@@ -88,6 +102,12 @@ export function useShopsmarterState() {
     setIntents((prev) =>
       prev.map((i) => (i.id === intentId ? { ...i, servings: Math.max(1, newServings) } : i))
     );
+  }, []);
+
+  const addCustomRecipe = useCallback((dishName: string, servings: number, ingredients: any[]) => {
+    const customIntent = createCustomRecipeIntent(dishName, servings, ingredients);
+    setIntents((prev) => [...prev, customIntent]);
+    setLastNotification(`Added custom dish "${dishName}" (${servings} servings) with ${ingredients.length} ingredients.`);
   }, []);
 
   const clearAllIntents = useCallback(() => {
@@ -242,6 +262,7 @@ export function useShopsmarterState() {
     lastNotification,
     setLastNotification,
     addFromNaturalLanguage,
+    addCustomRecipe,
     removeIntent,
     updateServings,
     clearAllIntents,
@@ -260,6 +281,9 @@ export function useShopsmarterState() {
     setItemPurchased,
     markItemOutOfStock,
     completeTripAndSyncPantry,
-    cancelShopping
+    cancelShopping,
+    llmConfig,
+    isParsingLLM,
+    updateLLMConfig
   };
 }

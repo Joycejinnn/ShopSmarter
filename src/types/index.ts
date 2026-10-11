@@ -60,6 +60,7 @@ export interface ShoppingIntent {
   recipeId?: string;
   recipeName?: string;
   servings?: number;
+  customIngredients?: RecipeIngredient[];
   directItem?: DirectItemIntent;
   rawText?: string;
   createdAt: string;
@@ -216,4 +217,12 @@ export interface ShoppingSession {
     reason: 'out_of_stock' | 'skipped';
   }[];
   startedAt: string;
+}
+
+export interface LLMConfig {
+  enabled: boolean;
+  provider: 'gemini' | 'openai' | 'ollama' | 'custom';
+  apiKey?: string;
+  endpoint?: string;
+  model?: string;
 }

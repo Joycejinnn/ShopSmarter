@@ -419,5 +419,398 @@ export const PREDEFINED_RECIPES: Recipe[] = [
         category: 'Cooking ingredients'
       }
     ]
+  },
+  {
+    id: 'recipe_beef_stew',
+    name: 'Potato & Beef Stew',
+    chineseName: '土豆炖牛肉',
+    aliases: ['beef stew', 'potato beef stew', 'beef and potato', '土豆炖牛肉', '土豆牛肉', '牛肉炖土豆'],
+    defaultServings: 2,
+    description: 'Tender simmered ground/diced beef with hearty russet potatoes and sweet onions.',
+    cuisine: 'Comfort Food',
+    ingredients: [
+      {
+        ingredientId: 'ing_ground_beef',
+        name: 'Ground Beef',
+        quantity: 300,
+        unit: 'g',
+        category: 'Meat'
+      },
+      {
+        ingredientId: 'ing_potatoes',
+        name: 'Potatoes',
+        quantity: 2,
+        unit: 'piece',
+        category: 'Vegetables'
+      },
+      {
+        ingredientId: 'ing_onion',
+        name: 'Yellow Onion',
+        quantity: 1,
+        unit: 'piece',
+        category: 'Vegetables'
+      },
+      {
+        ingredientId: 'ing_cooking_oil',
+        name: 'Cooking Oil',
+        quantity: 15,
+        unit: 'ml',
+        category: 'Cooking ingredients'
+      },
+      {
+        ingredientId: 'ing_salt',
+        name: 'Salt',
+        quantity: 4,
+        unit: 'g',
+        category: 'Cooking ingredients'
+      }
+    ]
+  },
+  {
+    id: 'recipe_onion_beef',
+    name: 'Stir-Fried Beef with Onions',
+    chineseName: '洋葱炒牛肉',
+    aliases: ['onion beef', 'beef with onion', 'beef with onions', '洋葱牛肉', '洋葱炒牛肉', '葱爆牛肉'],
+    defaultServings: 2,
+    description: 'Savory stir-fried seasoned beef tossed with caramelized sweet yellow onions and scallions.',
+    cuisine: 'Chinese Stir-Fry',
+    ingredients: [
+      {
+        ingredientId: 'ing_ground_beef',
+        name: 'Ground Beef',
+        quantity: 250,
+        unit: 'g',
+        category: 'Meat'
+      },
+      {
+        ingredientId: 'ing_onion',
+        name: 'Yellow Onion',
+        quantity: 1,
+        unit: 'piece',
+        category: 'Vegetables'
+      },
+      {
+        ingredientId: 'ing_scallions',
+        name: 'Green Onions (Scallions)',
+        quantity: 2,
+        unit: 'piece',
+        category: 'Vegetables'
+      },
+      {
+        ingredientId: 'ing_soy_sauce',
+        name: 'Soy Sauce',
+        quantity: 15,
+        unit: 'ml',
+        category: 'Cooking ingredients'
+      },
+      {
+        ingredientId: 'ing_cooking_oil',
+        name: 'Cooking Oil',
+        quantity: 15,
+        unit: 'ml',
+        category: 'Cooking ingredients'
+      }
+    ]
+  },
+  {
+    id: 'recipe_kung_pao_chicken',
+    name: 'Kung Pao Chicken',
+    chineseName: '宫保鸡丁',
+    aliases: ['kung pao chicken', 'kung pao', 'gong bao ji ding', '宫保鸡丁', '酱爆鸡丁'],
+    defaultServings: 2,
+    description: 'Cubed chicken thighs stir-fried with scallions, garlic, soy sauce and Sichuan spices.',
+    cuisine: 'Sichuan',
+    ingredients: [
+      {
+        ingredientId: 'ing_chicken_thighs',
+        name: 'Chicken Thighs',
+        quantity: 350,
+        unit: 'g',
+        category: 'Meat'
+      },
+      {
+        ingredientId: 'ing_scallions',
+        name: 'Green Onions (Scallions)',
+        quantity: 3,
+        unit: 'piece',
+        category: 'Vegetables'
+      },
+      {
+        ingredientId: 'ing_garlic',
+        name: 'Garlic',
+        quantity: 3,
+        unit: 'clove',
+        category: 'Vegetables'
+      },
+      {
+        ingredientId: 'ing_soy_sauce',
+        name: 'Soy Sauce',
+        quantity: 15,
+        unit: 'ml',
+        category: 'Cooking ingredients'
+      },
+      {
+        ingredientId: 'ing_sugar',
+        name: 'Sugar',
+        quantity: 10,
+        unit: 'g',
+        category: 'Cooking ingredients'
+      },
+      {
+        ingredientId: 'ing_cooking_oil',
+        name: 'Cooking Oil',
+        quantity: 20,
+        unit: 'ml',
+        category: 'Cooking ingredients'
+      }
+    ]
+  },
+  {
+    id: 'recipe_garlic_pasta',
+    name: 'Garlic Butter Spaghetti',
+    chineseName: '蒜香黄油意面',
+    aliases: ['garlic pasta', 'garlic spaghetti', 'aglio e olio', '蒜香意面', '大蒜意面', '黄油意面'],
+    defaultServings: 2,
+    description: 'Simple and comforting spaghetti tossed in fragrant sautéed garlic and butter.',
+    cuisine: 'Italian',
+    ingredients: [
+      {
+        ingredientId: 'ing_pasta',
+        name: 'Spaghetti Pasta',
+        quantity: 200,
+        unit: 'g',
+        category: 'Pasta'
+      },
+      {
+        ingredientId: 'ing_garlic',
+        name: 'Garlic',
+        quantity: 4,
+        unit: 'clove',
+        category: 'Vegetables'
+      },
+      {
+        ingredientId: 'ing_cooking_oil',
+        name: 'Cooking Oil / Butter',
+        quantity: 20,
+        unit: 'ml',
+        category: 'Cooking ingredients'
+      },
+      {
+        ingredientId: 'ing_salt',
+        name: 'Salt',
+        quantity: 3,
+        unit: 'g',
+        category: 'Cooking ingredients'
+      }
+    ]
+  },
+  {
+    id: 'recipe_tomato_egg_soup',
+    name: 'Tomato Egg Drop Soup',
+    chineseName: '番茄蛋花汤',
+    aliases: ['tomato egg soup', 'egg drop soup', 'tomato soup with egg', '番茄蛋花汤', '西红柿鸡蛋汤'],
+    defaultServings: 2,
+    description: 'Light and soothing soup featuring juicy ripe tomatoes and silky egg ribbons.',
+    cuisine: 'Chinese Home Cooking',
+    ingredients: [
+      {
+        ingredientId: 'ing_tomatoes',
+        name: 'Tomatoes',
+        quantity: 2,
+        unit: 'piece',
+        category: 'Vegetables'
+      },
+      {
+        ingredientId: 'ing_eggs',
+        name: 'Eggs',
+        quantity: 2,
+        unit: 'piece',
+        category: 'Dairy'
+      },
+      {
+        ingredientId: 'ing_scallions',
+        name: 'Green Onions (Scallions)',
+        quantity: 1,
+        unit: 'piece',
+        category: 'Vegetables'
+      },
+      {
+        ingredientId: 'ing_cooking_oil',
+        name: 'Cooking Oil',
+        quantity: 10,
+        unit: 'ml',
+        category: 'Cooking ingredients'
+      },
+      {
+        ingredientId: 'ing_salt',
+        name: 'Salt',
+        quantity: 3,
+        unit: 'g',
+        category: 'Cooking ingredients'
+      }
+    ]
+  },
+  {
+    id: 'recipe_chicken_rice',
+    name: 'Chicken Rice Bowl',
+    chineseName: '照烧鸡肉饭',
+    aliases: ['chicken rice bowl', 'teriyaki chicken', 'chicken rice', '鸡肉饭', '照烧鸡', '照烧鸡肉饭'],
+    defaultServings: 2,
+    description: 'Pan-seared glazed chicken thighs served over warm jasmine rice with scallions.',
+    cuisine: 'Asian Fusion',
+    ingredients: [
+      {
+        ingredientId: 'ing_chicken_thighs',
+        name: 'Chicken Thighs',
+        quantity: 350,
+        unit: 'g',
+        category: 'Meat'
+      },
+      {
+        ingredientId: 'ing_rice',
+        name: 'Jasmine Rice',
+        quantity: 250,
+        unit: 'g',
+        category: 'Rice and grains'
+      },
+      {
+        ingredientId: 'ing_soy_sauce',
+        name: 'Soy Sauce',
+        quantity: 20,
+        unit: 'ml',
+        category: 'Cooking ingredients'
+      },
+      {
+        ingredientId: 'ing_sugar',
+        name: 'Sugar',
+        quantity: 10,
+        unit: 'g',
+        category: 'Cooking ingredients'
+      },
+      {
+        ingredientId: 'ing_cooking_oil',
+        name: 'Cooking Oil',
+        quantity: 15,
+        unit: 'ml',
+        category: 'Cooking ingredients'
+      }
+    ]
+  },
+  {
+    id: 'recipe_bacon_eggs',
+    name: 'Bacon & Eggs Breakfast',
+    chineseName: '培根煎蛋',
+    aliases: ['bacon and eggs', 'bacon eggs', 'bacon breakfast', '培根煎蛋', '培根鸡蛋'],
+    defaultServings: 2,
+    description: 'Crispy thick-cut bacon strips paired with fried eggs sunny-side up.',
+    cuisine: 'American Breakfast',
+    ingredients: [
+      {
+        ingredientId: 'ing_bacon',
+        name: 'Thick Cut Bacon',
+        quantity: 150,
+        unit: 'g',
+        category: 'Meat'
+      },
+      {
+        ingredientId: 'ing_eggs',
+        name: 'Eggs',
+        quantity: 4,
+        unit: 'piece',
+        category: 'Dairy'
+      },
+      {
+        ingredientId: 'ing_cooking_oil',
+        name: 'Cooking Oil',
+        quantity: 10,
+        unit: 'ml',
+        category: 'Cooking ingredients'
+      }
+    ]
+  },
+  {
+    id: 'recipe_tofu_pork',
+    name: 'Braised Tofu with Pork',
+    chineseName: '肉末豆腐',
+    aliases: ['tofu with pork', 'minced pork tofu', 'pork tofu', '肉末豆腐', '家常豆腐'],
+    defaultServings: 2,
+    description: 'Home-style braised soft tofu simmered with savory minced pork and green onions.',
+    cuisine: 'Chinese Home Cooking',
+    ingredients: [
+      {
+        ingredientId: 'ing_tofu',
+        name: 'Soft Tofu',
+        quantity: 1,
+        unit: 'block',
+        category: 'Asian specialty ingredients'
+      },
+      {
+        ingredientId: 'ing_ground_pork',
+        name: 'Ground Pork',
+        quantity: 150,
+        unit: 'g',
+        category: 'Meat'
+      },
+      {
+        ingredientId: 'ing_scallions',
+        name: 'Green Onions (Scallions)',
+        quantity: 2,
+        unit: 'piece',
+        category: 'Vegetables'
+      },
+      {
+        ingredientId: 'ing_soy_sauce',
+        name: 'Soy Sauce',
+        quantity: 15,
+        unit: 'ml',
+        category: 'Cooking ingredients'
+      },
+      {
+        ingredientId: 'ing_cooking_oil',
+        name: 'Cooking Oil',
+        quantity: 15,
+        unit: 'ml',
+        category: 'Cooking ingredients'
+      }
+    ]
+  },
+  {
+    id: 'recipe_cucumber_salad',
+    name: 'Smashed Cucumber Salad',
+    chineseName: '拍黄瓜凉拌',
+    aliases: ['cucumber salad', 'smashed cucumber', 'pai huang gua', '拍黄瓜', '凉拌黄瓜', '黄瓜沙拉'],
+    defaultServings: 2,
+    description: 'Crispy smashed cucumber chunks tossed in garlic, soy sauce, and black vinegar.',
+    cuisine: 'Chinese Appetizer',
+    ingredients: [
+      {
+        ingredientId: 'ing_cucumber',
+        name: 'Cucumber',
+        quantity: 2,
+        unit: 'piece',
+        category: 'Vegetables'
+      },
+      {
+        ingredientId: 'ing_garlic',
+        name: 'Garlic',
+        quantity: 3,
+        unit: 'clove',
+        category: 'Vegetables'
+      },
+      {
+        ingredientId: 'ing_soy_sauce',
+        name: 'Soy Sauce',
+        quantity: 15,
+        unit: 'ml',
+        category: 'Cooking ingredients'
+      },
+      {
+        ingredientId: 'ing_salt',
+        name: 'Salt',
+        quantity: 3,
+        unit: 'g',
+        category: 'Cooking ingredients'
+      }
+    ]
   }
 ];
