@@ -39,3 +39,9 @@ dist-ssr/
 *.sln
 *.sw?
 Thumbs.db
+
+# API credentials and local routing cache
+.env
+.env.*
+!.env.example
+.transit-cache/

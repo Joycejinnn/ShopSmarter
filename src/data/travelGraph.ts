@@ -44,14 +44,12 @@ export function generateCurvedWaypoints(
   return points;
 }
 
-// Multimodal speed and cost parameters
+// Estimated travel parameters; fares are not modeled.
 export const TRANSPORT_MODES_CONFIG: Record<
   TransportationMode,
   {
     name: string;
     speedKmh: number;
-    costPerKm: number;
-    baseFare: number;
     comfortMaxDistanceKm: number;
     icon: string;
     description: string;
@@ -60,8 +58,6 @@ export const TRANSPORT_MODES_CONFIG: Record<
   walking: {
     name: 'Walking',
     speedKmh: 4.8, // ~80 m/min
-    costPerKm: 0.0,
-    baseFare: 0.0,
     comfortMaxDistanceKm: 3.5,
     icon: 'Footprints',
     description: 'Walk between stores. No transportation cost.'
@@ -69,17 +65,13 @@ export const TRANSPORT_MODES_CONFIG: Record<
   transit: {
     name: 'Public Transit',
     speedKmh: 22.0, // Bus transit including stops
-    costPerKm: 0.0,
-    baseFare: 2.25, // GoTriangle flat bus fare between Chapel Hill & Durham (Chapel Hill local is free)
     comfortMaxDistanceKm: 25.0,
     icon: 'Bus',
-    description: 'GoTriangle Route 400 & Chapel Hill Transit. Low cost, fixed stops.'
+    description: 'Simulated travel time only. Transit routes and fares are not verified.'
   },
   cycling: {
     name: 'Cycling',
     speedKmh: 16.0,
-    costPerKm: 0.0,
-    baseFare: 0.0,
     comfortMaxDistanceKm: 12.0,
     icon: 'Bike',
     description: 'Cycle between stores. No transportation cost.'
@@ -87,8 +79,6 @@ export const TRANSPORT_MODES_CONFIG: Record<
   driving: {
     name: 'Driving',
     speedKmh: 45.0, // Arterial roads US-15/501
-    costPerKm: 0.22, // Estimated fuel & vehicle maintenance
-    baseFare: 0.0,
     comfortMaxDistanceKm: 50.0,
     icon: 'Car',
     description: 'Fastest for long distances and heavy hauls. Travel time is estimated.'
@@ -123,14 +113,6 @@ export function getRouteSegment(
   // Minimum trip time floor
   durationMinutes = Math.max(3, durationMinutes);
 
-  let transitFare: number | undefined;
-  let transitDetails: string | undefined;
-
-  if (mode === 'transit') {
-    transitFare = 2.25;
-    transitDetails = 'GoTriangle Route 400 (Chapel Hill - Durham Express)';
-  }
-
   const geometry = generateCurvedWaypoints(fromCoords, toCoords);
 
   return {
@@ -141,8 +123,6 @@ export function getRouteSegment(
     distanceMeters,
     durationMinutes,
     transportMode: mode,
-    transitFare,
-    transitDetails,
     geometry
   };
 }

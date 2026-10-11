@@ -38,7 +38,6 @@ export function App() {
     setDestinationMode,
     toggleStoreExclusion,
     setOptimizationMode,
-    loadScenario,
     startShopping,
     markItemPurchased,
     setItemPurchased,
@@ -157,11 +156,7 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-brand-canvas text-brand-text flex flex-col">
-      <Header
-        onLoadScenario={loadScenario}
-        onStartShopping={startShopping}
-        canStartShopping={plan.routeStops.length > 0}
-      />
+      <Header />
 
       <main id="main-content" className="flex-1">
         <div className="page-intro"><div><p className="eyebrow">LESS PLANNING. BETTER SHOPPING.</p><h1>Your next shop, simplified.</h1><p>Bring your list. We’ll bring it together.</p></div><span className="demo-note">Demo prices & simulated routes</span></div>

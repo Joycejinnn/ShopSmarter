@@ -12,6 +12,7 @@ import {
 import { loadPantryFromStorage, savePantryToStorage, addOrUpdatePantryItem, removePantryItem as removePantryItemService, incorporatePurchasedItemsIntoPantry, resetPantryToDefault } from '../services/pantryService';
 import { calculateIngredientShortfalls } from '../algorithms/shortfallCalculator';
 import { optimizeShoppingPlan } from '../algorithms/storeOptimizer';
+import { mergeShoppingIntents } from '../services/mergeShoppingIntents';
 import { parseNaturalLanguageInput } from '../services/intentParser';
 import { DEMO_ORIGIN_LOCATIONS } from '../data/stores';
 import { DEMO_SCENARIOS } from '../data/demoScenarios';
@@ -72,7 +73,7 @@ export function useShopsmarterState() {
   const addFromNaturalLanguage = useCallback((input: string) => {
     const res = parseNaturalLanguageInput(input);
     if (res.intents.length > 0) {
-      setIntents((prev) => [...prev, ...res.intents]);
+      setIntents((prev) => mergeShoppingIntents(prev, res.intents));
       setLastNotification(res.explanation);
     } else {
       setLastNotification(res.explanation);

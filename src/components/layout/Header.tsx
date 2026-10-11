@@ -1,20 +1,8 @@
 import React, { useState } from 'react';
-import { ShoppingBag, Sparkles, Navigation, Layers, ShieldCheck, Info, X } from 'lucide-react';
-import { DEMO_SCENARIOS } from '../../data/demoScenarios';
+import { ShoppingBag, ShieldCheck, Info, X } from 'lucide-react';
 import { ServiceIntegrationsCatalog } from '../../services/apiAdapters';
 
-interface HeaderProps {
-  onLoadScenario: (scenarioId: string) => void;
-  onStartShopping: () => void;
-  canStartShopping: boolean;
-  activeScenarioId?: string;
-}
-
-export const Header: React.FC<HeaderProps> = ({
-  onLoadScenario,
-  onStartShopping,
-  canStartShopping,
-}) => {
+export const Header: React.FC = () => {
   const [showApiModal, setShowApiModal] = useState(false);
 
   return (
@@ -23,8 +11,6 @@ export const Header: React.FC<HeaderProps> = ({
       <header className="app-header"><div className="header-inner">
         <a href="#main-content" className="wordmark"><ShoppingBag size={23} aria-hidden="true" />Shopsmarter<span className="brand-dot">.</span></a>
         <div className="header-tools">
-          <label className="sr-only" htmlFor="demo-scenario">Try a demo</label>
-          <select id="demo-scenario" value="" onChange={e => {if(e.target.value) onLoadScenario(e.target.value);}}><option value="">Try a demo</option>{DEMO_SCENARIOS.map(s => <option key={s.id} value={s.id}>{s.badge}</option>)}</select>
           <button onClick={() => setShowApiModal(true)} className="about-button"><Info size={16} aria-hidden="true" /><span>About the data</span></button>
         </div>
       </div></header>

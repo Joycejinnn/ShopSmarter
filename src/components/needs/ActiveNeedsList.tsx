@@ -1,7 +1,7 @@
 import React from 'react';
 import { ShoppingIntent } from '../../types';
-import { getRecipeById } from '../../services/recipeService';
-import { Utensils, Package, Trash2, Users, Minus, Plus, Sparkles } from 'lucide-react';
+import { getRecipeById, scaleRecipeIngredients } from '../../services/recipeService';
+import { Utensils, Package, Trash2, Users, Minus, Plus } from 'lucide-react';
 
 interface ActiveNeedsListProps {
   intents: ShoppingIntent[];
@@ -27,7 +27,7 @@ export const ActiveNeedsList: React.FC<ActiveNeedsListProps> = ({
         </div>
         <h4 className="font-bold text-sm text-brand-darkgreen">No active meals or items yet</h4>
         <p className="text-xs text-brand-muted mt-1 max-w-xs mx-auto">
-          Type dishes (e.g. "mapo tofu and spaghetti") or household essentials above, or click a demo scenario!
+          Type dishes (e.g. "mapo tofu and spaghetti") or household essentials above, or use Quick add.
         </p>
       </div>
     );
@@ -55,13 +55,15 @@ export const ActiveNeedsList: React.FC<ActiveNeedsListProps> = ({
           <div className="text-[11px] font-semibold text-brand-muted">Dishes to Cook:</div>
           {recipeIntents.map((intent) => {
             const recipe = intent.recipeId ? getRecipeById(intent.recipeId) : null;
-            const servings = intent.servings || 2;
+            const servings = intent.servings || recipe?.defaultServings || 2;
+            const ingredients = recipe ? scaleRecipeIngredients(recipe, servings) : [];
 
             return (
               <div
                 key={intent.id}
-                className="bg-brand-card p-3 rounded-xl border border-brand-border shadow-sm hover:border-brand-sage/60 transition-all flex items-center justify-between gap-3"
+                className="bg-brand-card p-3 rounded-xl border border-brand-border shadow-sm hover:border-brand-sage/60 transition-all"
               >
+                <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-xs sm:text-sm text-brand-darkgreen break-words">
@@ -109,6 +111,28 @@ export const ActiveNeedsList: React.FC<ActiveNeedsListProps> = ({
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
+                </div>
+                {recipe && (
+                  <details className="mt-3 border-t border-brand-border pt-2">
+                    <summary className="cursor-pointer text-xs font-semibold text-brand-primary rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-primary">
+                      Ingredients for {servings} {servings === 1 ? 'serving' : 'servings'}
+                    </summary>
+                    <p className="mt-2 text-[11px] text-brand-muted">Full recipe amounts, before pantry deductions.</p>
+                    <ul className="mt-2 space-y-2" aria-label={`${recipe.name} ingredients`}>
+                      {ingredients.map((ingredient) => (
+                        <li key={ingredient.ingredientId} className="flex items-start justify-between gap-3 text-xs">
+                          <span className="min-w-0 text-brand-text">
+                            {ingredient.name}
+                            {ingredient.optional && <span className="ml-1 text-brand-muted">(optional)</span>}
+                          </span>
+                          <span className="shrink-0 font-medium text-brand-darkgreen tabular-nums">
+                            {ingredient.quantity} {ingredient.unit}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </details>
+                )}
               </div>
             );
           })}
