@@ -1,6 +1,8 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useGeolocation } from './useGeolocation';
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import {
   ShoppingIntent,
+  DirectItemIntent,
   RecipeIngredient,
   PantryItem,
   TripContext,
@@ -20,14 +22,6 @@ import { parseNaturalLanguageWithLLM, getLLMConfig, saveLLMConfig } from '../ser
 import { DEMO_ORIGIN_LOCATIONS } from '../data/stores';
 import { DEMO_SCENARIOS } from '../data/demoScenarios';
 
-const DEFAULT_ORIGIN: LocationPoint = {
-  lat: DEMO_ORIGIN_LOCATIONS[1].lat, // Meadowmont
-  lng: DEMO_ORIGIN_LOCATIONS[1].lng,
-  label: DEMO_ORIGIN_LOCATIONS[1].label,
-  source: 'demo',
-  capturedAt: new Date().toISOString()
-};
-
 export function useShopsmarterState() {
   // 1. Intents
   const [intents, setIntents] = useState<ShoppingIntent[]>(() => {
@@ -41,12 +35,20 @@ export function useShopsmarterState() {
 
   // 3. Trip Context
   const [tripContext, setTripContext] = useState<TripContext>({
-    origin: DEFAULT_ORIGIN,
+    origin: null,
     destinationMode: 'return_to_origin',
     transportMode: 'driving',
     maxStops: 2,
     excludedStoreIds: []
   });
+
+  const location = useGeolocation();
+  const requestedInitialLocation = useRef(false);
+  useEffect(() => {
+    if (requestedInitialLocation.current) return;
+    requestedInitialLocation.current = true;
+    location.requestBrowserLocation(point => setTripContext(previous => ({...previous, origin: point})));
+  }, [location.requestBrowserLocation]);
 
   // 4. Optimization Priority
   const [optimizationMode, setOptimizationMode] = useState<OptimizationPriority>('balanced');
@@ -95,6 +97,19 @@ export function useShopsmarterState() {
       setIsParsingLLM(false);
     }
   }, [llmConfig]);
+
+  // Manual essentials are structured input and never pass through a parser or LLM.
+  const addDirectItem = useCallback((item: DirectItemIntent) => {
+    if (!item.name.trim() || !Number.isFinite(item.quantity) || item.quantity <= 0) return;
+    const intent: ShoppingIntent = {
+      id: `intent_direct_${crypto.randomUUID()}`,
+      type: 'direct_item',
+      directItem: { ...item, name: item.name.trim() },
+      createdAt: new Date().toISOString()
+    };
+    setIntents(prev => [...prev, intent]);
+    setLastNotification(`Added ${item.name.trim()} (${item.quantity} ${item.unit}) to your shopping list.`);
+  }, []);
 
   const removeIntent = useCallback((id: string) => {
     setIntents((prev) => prev.filter((i) => i.id !== id));
@@ -148,6 +163,7 @@ export function useShopsmarterState() {
   }, []);
 
   const setOrigin = useCallback((origin: LocationPoint) => {
+    location.clearError();
     setTripContext((prev) => ({ ...prev, origin }));
   }, []);
 
@@ -266,6 +282,7 @@ export function useShopsmarterState() {
     intents,
     pantryItems,
     tripContext,
+    location,
     optimizationMode,
     requirements,
     plan,
@@ -274,6 +291,7 @@ export function useShopsmarterState() {
     setLastNotification,
     addFromNaturalLanguage,
     addCustomRecipe,
+    addDirectItem,
     removeIntent,
     updateServings,
     updateRecipeIngredients,

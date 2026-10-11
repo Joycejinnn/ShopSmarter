@@ -170,6 +170,10 @@ export interface RouteSegment {
   transportMode: TransportationMode;
   transitFare?: number;
   transitUnavailable?: boolean;
+  walkingRecommendation?: string;
+  comparedTransitMinutes?: number;
+  lastMileWalkMeters?: number;
+  lastMileWalkMinutes?: number;
   transitDetails?: string;
   transitRouteName?: string;
   boardingStop?: string;
@@ -203,7 +207,7 @@ export interface ShoppingPlan {
 }
 
 export interface TripContext {
-  origin: LocationPoint;
+  origin: LocationPoint | null;
   destinationMode: 'return_to_origin' | 'another_location' | 'finish_at_last_store';
   destinationLocation?: LocationPoint;
   transportMode: TransportationMode;

@@ -60,6 +60,7 @@ export const MapView: React.FC<MapViewProps> = ({
     let active = true;
     layerGroup.clearLayers();
 
+    if (!tripContext.origin) return;
     const bounds = L.latLngBounds([]);
 
     // 1. Add Origin Marker
@@ -149,11 +150,11 @@ export const MapView: React.FC<MapViewProps> = ({
     if (plan.routeSegments && plan.routeSegments.length > 0) {
       plan.routeSegments.forEach((segment, idx) => {
         const polylineColor =
-          tripContext.transportMode === 'walking'
+          segment.transportMode === 'walking'
             ? '#2D6A4F'
-            : tripContext.transportMode === 'transit'
+            : segment.transportMode === 'transit'
             ? '#3B82F6'
-            : tripContext.transportMode === 'cycling'
+            : segment.transportMode === 'cycling'
             ? '#10B981'
             : '#E76F51';
 
@@ -161,21 +162,22 @@ export const MapView: React.FC<MapViewProps> = ({
           color: polylineColor,
           weight: 4,
           opacity: 0.85,
-          dashArray: tripContext.transportMode === 'walking' ? '6, 8' : undefined
+          dashArray: segment.transportMode === 'walking' ? '6, 8' : undefined
         }).addTo(layerGroup);
 
         segment.geometry.forEach((pt) => bounds.extend(pt));
 
         const tooltipContent =
+          segment.walkingRecommendation ? `Walking recommended: ${segment.durationMinutes} min (estimated)${segment.comparedTransitMinutes !== undefined ? '; transit: ' + segment.comparedTransitMinutes + ' min' : ''}` :
           segment.transitUnavailable ? 'No transit connection found in the local network' :
-          tripContext.transportMode === 'transit' && segment.transitRouteName
+          segment.transportMode === 'transit' && segment.transitRouteName
             ? `<strong>Leg ${idx + 1} (Bus):</strong> ${escapeHtml(segment.transitRouteName)} (${segment.durationMinutes} min${segment.transitFare !== undefined ? ` · ${segment.transitFare === 0 ? 'Free' : '$' + segment.transitFare.toFixed(2)}` : ''})<br/><span style="font-size: 10px; color: #4B5563;">Board: ${escapeHtml(segment.boardingStop || '')} → ${escapeHtml(segment.debarkingStop || '')}${segment.transferStop ? '<br/>🔄 Transfer: ' + escapeHtml(segment.transferStop) : ''}${segment.firstMileWalkMeters && segment.firstMileWalkMeters > 150 ? '<br/>🚶 Walk to stop: ' + Math.round(segment.firstMileWalkMeters) + 'm' : ''}</span>`
             : `Leg ${idx + 1}: ${escapeHtml(segment.fromName)} → ${escapeHtml(segment.toName)} (${segment.durationMinutes} min, ${(segment.distanceMeters / 1000).toFixed(1)} km)`;
 
         polyline.bindTooltip(tooltipContent, { sticky: true });
 
         // Asynchronously fetch real turn-by-turn road network coordinates from OSRM
-        if (tripContext.transportMode !== 'transit') fetchRealRoadGeometry(segment.fromCoords, segment.toCoords, tripContext.transportMode)
+        if (segment.transportMode !== 'transit') fetchRealRoadGeometry(segment.fromCoords, segment.toCoords, segment.transportMode)
           .then((realCoords) => {
             if (active && realCoords && realCoords.length > 1) {
               polyline.setLatLngs(realCoords);
@@ -204,7 +206,7 @@ export const MapView: React.FC<MapViewProps> = ({
           <span>Chapel Hill / Durham Route</span>
           {tripContext.transportMode === 'transit' ? (
             <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 font-bold border border-blue-300">
-              Estimated transit network
+              {plan.routeSegments.length > 0 && plan.routeSegments.every(segment => segment.transportMode === 'walking') ? 'Walking recommended' : 'Estimated transit / walking'}
             </span>
           ) : (
             <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">

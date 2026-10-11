@@ -164,6 +164,8 @@ export function getAvailablePurchaseOptions(
 
     // Whole package conversion: ceil(needed / packQuantity)
     const packs = Math.max(1, Math.ceil(neededInOfferUnits / offer.packQuantity));
+    // Unknown stock remains usable; a known count is a hard upper bound.
+    if (offer.availablePackCount !== undefined && packs > offer.availablePackCount) continue;
     const buyQuantity = packs * offer.packQuantity;
     const surplus = Math.max(0, buyQuantity - neededInOfferUnits);
     const totalCost = Math.round(packs * offer.packPrice * 100) / 100;

@@ -10,7 +10,7 @@ import {
 } from '../types';
 import { DEMO_STORES } from '../data/stores';
 import { getAvailablePurchaseOptions } from './shortfallCalculator';
-import { getRouteSegment, TRANSPORT_MODES_CONFIG } from '../data/travelGraph';
+import { getRouteSegment } from '../data/travelGraph';
 
 // Permutations helper for small arrays (1 to 3 items)
 function getPermutations<T>(items: T[]): T[][] {
@@ -68,7 +68,33 @@ export function optimizeShoppingPlan(
   tripContext: TripContext,
   mode: OptimizationPriority
 ): ShoppingPlan {
-  const activeRequirements = requirements.filter((r) => r.shortfall > 0);
+  // Combine purchase shortfalls after pantry deduction. Direct purchases retain their
+  // full quantity; recipe needs contribute only their remaining shortfall.
+  const grouped = new Map<string, IngredientRequirement>();
+  for (const requirement of requirements.filter(r => r.shortfall > 0)) {
+    const rawUnit = requirement.unit.trim().toLowerCase();
+    const unit = rawUnit === 'kg' ? 'g' : rawUnit === 'l' ? 'ml' : rawUnit;
+    const multiplier = rawUnit === 'kg' || rawUnit === 'l' ? 1000 : 1;
+    const key = JSON.stringify([requirement.ingredientId, unit]);
+    const normalized = {
+      ...requirement, unit,
+      totalRequired: requirement.totalRequired * multiplier,
+      pantryAvailable: requirement.pantryAvailable * multiplier,
+      shortfall: requirement.shortfall * multiplier,
+      sourceContributions: requirement.sourceContributions.map(source => ({
+        ...source, quantity: source.quantity * multiplier
+      }))
+    };
+    const existing = grouped.get(key);
+    if (existing) {
+      existing.totalRequired += normalized.totalRequired;
+      existing.pantryAvailable += normalized.pantryAvailable;
+      existing.shortfall += normalized.shortfall;
+      existing.sourceContributions.push(...normalized.sourceContributions);
+      existing.isDirectPurchase = existing.isDirectPurchase && normalized.isDirectPurchase;
+    } else grouped.set(key, normalized);
+  }
+  const activeRequirements = [...grouped.values()];
 
   // If no shopping needed, return empty feasible plan
   if (activeRequirements.length === 0) {
@@ -91,6 +117,14 @@ export function optimizeShoppingPlan(
       calculatedAt: new Date().toISOString(),
       isOptimalWithinScope: true
     };
+  }
+
+  if (!tripContext.origin) {
+    return { mode, storeAllocations: [], unresolvedRequirements: [], routeStops: [], routeSegments: [],
+      totalGoodsCost: 0, totalTripCost: 0, totalCost: 0, totalTravelMinutes: 0,
+      totalShoppingMinutes: 0, totalTripMinutes: 0, totalWeightKg: 0,
+      isFeasible: false, feasibilityIssues: ['Set a starting location to plan your trip.'],
+      explanation: 'Waiting for a starting location.', calculatedAt: new Date().toISOString(), isOptimalWithinScope: false };
   }
 
   // 1. Identify which requirements have NO offers anywhere in candidate stores
@@ -126,7 +160,7 @@ export function optimizeShoppingPlan(
 
     // Check if this subset can fulfill all fulfillableRequirements
     let canFulfillAll = true;
-    const reqOptionsMap = new Map<string, PurchaseOption[]>();
+    const reqOptionsMap = new Map<IngredientRequirement, PurchaseOption[]>();
 
     for (const req of fulfillableRequirements) {
       const options = getAvailablePurchaseOptions(req, storeIds);
@@ -134,7 +168,7 @@ export function optimizeShoppingPlan(
         canFulfillAll = false;
         break;
       }
-      reqOptionsMap.set(req.ingredientId, options);
+      reqOptionsMap.set(req, options);
     }
 
     if (!canFulfillAll) {
@@ -146,7 +180,7 @@ export function optimizeShoppingPlan(
     const chosenOptions: { requirement: IngredientRequirement; option: PurchaseOption }[] = [];
 
     for (const req of fulfillableRequirements) {
-      const options = reqOptionsMap.get(req.ingredientId) || [];
+      const options = reqOptionsMap.get(req) || [];
       if (options.length === 0) continue;
 
       // Sort options:
@@ -158,6 +192,19 @@ export function optimizeShoppingPlan(
         option: options[0]
       });
     }
+
+    // Different requirement identities can still match the same physical offer.
+    // Never allocate more stock than that offer has across the entire basket.
+    const reservedPacks = new Map<string, number>();
+    let exceedsStock = false;
+    for (const { option } of chosenOptions) {
+      const reserved = (reservedPacks.get(option.offer.offerId) || 0) + option.packs;
+      reservedPacks.set(option.offer.offerId, reserved);
+      if (option.offer.availablePackCount !== undefined && reserved > option.offer.availablePackCount) {
+        exceedsStock = true;
+      }
+    }
+    if (exceedsStock) continue;
 
     // Determine stores actually used
     const usedStoreIds = new Set(chosenOptions.map((co) => co.option.offer.storeId));
@@ -322,7 +369,7 @@ export function optimizeShoppingPlan(
       totalWeightKg: 0,
       isFeasible: false,
       feasibilityIssues: [
-        'No feasible store combination can cover all items with current store filters and max stops limit.'
+        'No store combination can cover all quantities within current stock, store filters, and stop limits.'
       ],
       explanation:
         'Could not find a feasible route covering all required items within candidate stores. Try increasing maximum stops or enabling excluded stores.',
@@ -332,8 +379,10 @@ export function optimizeShoppingPlan(
   }
 
   // Reference floors for balanced calculation
-  const minCost = Math.max(1, Math.min(...candidatePlans.map((p) => p.totalCost)));
-  const minTime = Math.max(1, Math.min(...candidatePlans.map((p) => p.totalTripMinutes)));
+  const feasibleCandidates = candidatePlans.filter(plan => plan.isFeasible);
+  const referencePlans = feasibleCandidates.length ? feasibleCandidates : candidatePlans;
+  const minCost = Math.max(1, Math.min(...referencePlans.map((p) => p.totalCost)));
+  const minTime = Math.max(1, Math.min(...referencePlans.map((p) => p.totalTripMinutes)));
 
   // Sorting based on Mode
   candidatePlans.sort((a, b) => {
@@ -406,10 +455,10 @@ export function optimizeShoppingPlan(
     feasibilityIssues: [
       ...selectedPlan.feasibilityIssues,
       ...(unresolvedRequirements.length > 0
-        ? [`${unresolvedRequirements.length} item(s) are unavailable in candidate stores.`]
+        ? [`${unresolvedRequirements.length} item(s) have no single offer with sufficient stock in candidate stores.`]
         : [])
     ],
-    explanation,
+    explanation: unresolvedRequirements.length ? `Some items could not be covered in full. ${explanation.replace('complete coverage with ', '').replace('fulfilling all ingredients', 'covering matched items')}` : explanation,
     calculatedAt: new Date().toISOString(),
     isOptimalWithinScope: true
   };

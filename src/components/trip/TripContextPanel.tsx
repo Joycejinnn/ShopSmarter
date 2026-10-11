@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 
 interface TripContextPanelProps {
+  location: ReturnType<typeof useGeolocation>;
   tripContext: TripContext;
   onSetOrigin: (origin: LocationPoint) => void;
   onSetDestinationMode: (
@@ -31,10 +32,11 @@ interface TripContextPanelProps {
 
 export const TripContextPanel: React.FC<TripContextPanelProps> = ({
   tripContext,
+  location,
   onSetOrigin,
   onSetDestinationMode
 }) => {
-  const { requestBrowserLocation, isLocating, error, clearError } = useGeolocation();
+  const { requestBrowserLocation, isLocating, isRetrying, error, clearError } = location;
   const [showLocationPicker, setShowLocationPicker] = useState(false);
 
   const handleUseCurrentLocation = () => {
@@ -80,10 +82,10 @@ export const TripContextPanel: React.FC<TripContextPanelProps> = ({
         <div className="p-2.5 bg-brand-canvas rounded-xl border border-brand-border flex items-center justify-between gap-2 text-xs">
           <div className="min-w-0">
             <div className="font-bold text-brand-darkgreen truncate">
-              {tripContext.origin.label}
+              {tripContext.origin?.label || (isLocating ? 'Finding your location...' : 'Set your starting location')}
             </div>
             <div className="text-[10px] text-brand-muted flex items-center gap-2">
-              <span>Source: {tripContext.origin.source}</span>
+              <span>Source: {tripContext.origin?.source || 'Not set'}</span>
               <span>•</span>
               <span>Service Area: Chapel Hill / Durham</span>
             </div>
@@ -91,7 +93,7 @@ export const TripContextPanel: React.FC<TripContextPanelProps> = ({
         </div>
 
         {/* Location Selector Dropdown */}
-        {showLocationPicker && (
+        {(showLocationPicker || !tripContext.origin) && (
           <div className="mt-2 p-3 bg-white rounded-xl border border-brand-border shadow-soft space-y-2 text-xs animate-in fade-in">
             <OriginInput onSelect={point => {onSetOrigin(point); setShowLocationPicker(false);}} />
 
@@ -101,7 +103,7 @@ export const TripContextPanel: React.FC<TripContextPanelProps> = ({
               className="w-full p-2 rounded-lg bg-brand-lightgreen text-brand-darkgreen hover:bg-brand-sage hover:text-white font-medium flex items-center justify-center gap-1.5 transition-colors"
             >
               <Navigation className="w-3.5 h-3.5" />
-              <span>{isLocating ? 'Locating...' : 'Use Current GPS Location'}</span>
+              <span>{isLocating ? (isRetrying ? 'Retrying with lower accuracy...' : 'Locating...') : 'Use Current GPS Location'}</span>
             </button>
 
             {error && (

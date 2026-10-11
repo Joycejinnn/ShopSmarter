@@ -1,7 +1,8 @@
 import React from 'react';
-import { ShoppingIntent, RecipeIngredient } from '../../types';
+import { ShoppingIntent, RecipeIngredient, DirectItemIntent } from '../../types';
 import { getRecipeById, getIntentIngredients } from '../../services/recipeService';
 import { RecipeIngredientEditor } from './RecipeIngredientEditor';
+import { DirectItemInput } from './DirectItemInput';
 import { Utensils, Package, Trash2, Users, Minus, Plus } from 'lucide-react';
 
 interface ActiveNeedsListProps {
@@ -9,6 +10,7 @@ interface ActiveNeedsListProps {
   onRemoveIntent: (id: string) => void;
   onUpdateServings: (intentId: string, servings: number) => void;
   onClearAll: () => void;
+  onAddDirectItem: (item: DirectItemIntent) => void;
   onUpdateRecipeIngredients: (id: string, ingredients: RecipeIngredient[] | null) => void;
 }
 
@@ -17,24 +19,12 @@ export const ActiveNeedsList: React.FC<ActiveNeedsListProps> = ({
   onRemoveIntent,
   onUpdateServings,
   onUpdateRecipeIngredients,
-  onClearAll
+  onClearAll,
+  onAddDirectItem
 }) => {
   const recipeIntents = intents.filter((i) => i.type === 'recipe');
   const directIntents = intents.filter((i) => i.type === 'direct_item');
 
-  if (intents.length === 0) {
-    return (
-      <div className="bg-brand-card p-6 rounded-2xl border border-dashed border-brand-border text-center shadow-sm">
-        <div className="w-10 h-10 rounded-full bg-brand-lightgreen text-brand-primary flex items-center justify-center mx-auto mb-2">
-          <Utensils className="w-5 h-5" />
-        </div>
-        <h4 className="font-bold text-sm text-brand-darkgreen">No active meals or items yet</h4>
-        <p className="text-xs text-brand-muted mt-1 max-w-xs mx-auto">
-          Type dishes (e.g. "mapo tofu and spaghetti") or household essentials above, or use Quick add.
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-3">
@@ -136,9 +126,10 @@ export const ActiveNeedsList: React.FC<ActiveNeedsListProps> = ({
       )}
 
       {/* Direct Household & Grocery Purchases */}
-      {directIntents.length > 0 && (
+      {(
         <div className="space-y-2 pt-1">
           <div className="text-[11px] font-semibold text-brand-muted">Household & Direct Essentials:</div>
+          <DirectItemInput onAdd={onAddDirectItem} />
           <div className="flex flex-wrap gap-2">
             {directIntents.map((intent) => {
               const item = intent.directItem;

@@ -9,7 +9,7 @@ import { optimizeShoppingPlan } from '../algorithms/storeOptimizer';
 import { DEMO_STORES } from '../data/stores';
 import { RecipeIngredient, TripContext } from '../types';
 
-const context: TripContext = {
+const context: TripContext & { origin: NonNullable<TripContext['origin']> } = {
   origin: { lat: 35.9105, lng: -79.0755, label: 'Carrboro', source: 'manual', capturedAt: '' },
   destinationMode: 'return_to_origin', transportMode: 'transit', maxStops: 2, excludedStoreIds: []
 };

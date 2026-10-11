@@ -439,7 +439,7 @@ export function getRouteSegment(
 
   // Road network factor: roads are ~1.25x - 1.4x straight line distance
   const roadFactor = mode === 'transit' ? 1.35 : mode === 'walking' ? 1.25 : 1.3;
-  const distanceMeters = Math.round(straightMeters * roadFactor);
+  let distanceMeters = Math.round(straightMeters * roadFactor);
   const distanceKm = distanceMeters / 1000;
 
   const config = TRANSPORT_MODES_CONFIG[mode];
@@ -456,6 +456,9 @@ export function getRouteSegment(
   let firstMileWalkMinutes: number | undefined;
   let isTransitDesert: boolean | undefined;
   let transitUnavailable: boolean | undefined;
+  let lastMileWalkMeters: number | undefined;
+  let lastMileWalkMinutes: number | undefined;
+  let transitGeometry: [number, number][] | undefined;
 
   if (mode === 'transit') {
     const tr = resolveTransitRouteDetails(fromCoords, toCoords);
@@ -471,19 +474,47 @@ export function getRouteSegment(
     firstMileWalkMinutes = tr.firstMileWalkMinutes;
     isTransitDesert = tr.isTransitDesert;
 
-    // Realistic transit duration:
-    // Base ride time at ~22 km/h + walking time to stop + wait/transfer headway
-    const baseRideMinutes = Math.round((distanceKm / config.speedKmh) * 60);
-    const waitHeadwayMinutes = tr.transferStop ? 14 : 7;
-    durationMinutes = tr.routeName === 'Walk'
-      ? Math.max(3, Math.round(distanceMeters / 80))
-      : Math.max(5, baseRideMinutes + tr.firstMileWalkMinutes + waitHeadwayMinutes);
+    const walking = getRouteSegment(fromName, fromCoords, toName, toCoords, 'walking');
+    if (tr.routeName === 'Walk') {
+      return { ...walking, walkingRecommendation: 'Walk directly; no bus ride is needed.' };
+    }
+    if (tr.routeName) {
+      const boarding = findNearestTransitStop(fromCoords);
+      const debarking = findNearestTransitStop(toCoords);
+      const hub = LOCAL_TRANSIT_STOPS.find(stop => stop.stopName === tr.transferStop);
+      const rideStops = [boarding, ...(hub ? [hub] : []), debarking];
+      let rideMeters = 0;
+      for (let index = 1; index < rideStops.length; index++) {
+        rideMeters += calculateHaversineDistanceMeters(rideStops[index - 1], rideStops[index]) * 1.35;
+      }
+      // Include both access and egress, using the same walking estimate as the direct route.
+      const access = getRouteSegment(fromName, fromCoords, boarding.stopName, [boarding.lat, boarding.lng], 'walking');
+      const egress = getRouteSegment(debarking.stopName, [debarking.lat, debarking.lng], toName, toCoords, 'walking');
+      firstMileWalkMeters = access.distanceMeters;
+      firstMileWalkMinutes = access.distanceMeters === 0 ? 0 : access.durationMinutes;
+      lastMileWalkMeters = egress.distanceMeters;
+      lastMileWalkMinutes = egress.distanceMeters === 0 ? 0 : egress.durationMinutes;
+      const rideMinutes = Math.ceil(rideMeters / 1000 / config.speedKmh * 60);
+      const waitingMinutes = hub ? 14 : 7;
+      durationMinutes = firstMileWalkMinutes + lastMileWalkMinutes + rideMinutes + waitingMinutes;
+      distanceMeters = Math.round(access.distanceMeters + rideMeters + egress.distanceMeters);
+      if (firstMileWalkMinutes >= walking.durationMinutes || durationMinutes >= walking.durationMinutes) {
+        return {
+          ...walking,
+          walkingRecommendation: 'Walking is estimated to be as fast or faster than taking transit.',
+          comparedTransitMinutes: durationMinutes
+        };
+      }
+      // Schematic stop connections, not a verified bus-road shape.
+      transitGeometry = [fromCoords, ...rideStops.map(stop => [stop.lat, stop.lng] as [number, number]), toCoords];
+    }
+
   }
 
   // Minimum trip time floor
   durationMinutes = Math.max(3, durationMinutes);
 
-  const geometry = generateCurvedWaypoints(fromCoords, toCoords);
+  const geometry = transitGeometry || generateCurvedWaypoints(fromCoords, toCoords);
 
   return {
     fromName,
@@ -502,6 +533,8 @@ export function getRouteSegment(
     transferRouteName,
     firstMileWalkMeters,
     firstMileWalkMinutes,
+    lastMileWalkMeters,
+    lastMileWalkMinutes,
     isTransitDesert,
     transitUnavailable,
     geometry

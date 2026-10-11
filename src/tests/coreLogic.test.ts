@@ -17,7 +17,7 @@ describe('Shopsmarter Core Logic & Verification Suite', () => {
     capturedAt: new Date().toISOString()
   };
 
-  const defaultTripContext: TripContext = {
+  const defaultTripContext: TripContext & { origin: NonNullable<TripContext['origin']> } = {
     origin: dummyOrigin,
     destinationMode: 'return_to_origin',
     transportMode: 'walking',

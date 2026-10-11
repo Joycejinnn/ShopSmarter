@@ -21,6 +21,7 @@ export function App() {
     intents,
     pantryItems,
     tripContext,
+    location,
     optimizationMode,
     requirements,
     plan,
@@ -28,6 +29,7 @@ export function App() {
     lastNotification,
     addFromNaturalLanguage,
     addCustomRecipe,
+    addDirectItem,
     removeIntent,
     updateServings,
     updateRecipeIngredients,
@@ -69,6 +71,7 @@ export function App() {
         onUpdateServings={updateServings}
         onUpdateRecipeIngredients={updateRecipeIngredients}
         onClearAll={clearAllIntents}
+        onAddDirectItem={addDirectItem}
       />
       <details className="disclosure"><summary>My pantry <span>{pantryItems.length} items · edit inventory</span></summary><div className="pt-4">
       <PantryInventory
@@ -94,11 +97,11 @@ export function App() {
         onToggleStoreExclusion={toggleStoreExclusion}
       />
 
-      <RouteSummaryCard
+      {!tripContext.origin ? <TripContextPanel tripContext={tripContext} location={location} onSetOrigin={setOrigin} onSetDestinationMode={setDestinationMode} /> : <RouteSummaryCard
         plan={plan}
         tripContext={tripContext}
         onStartShopping={startShopping}
-      />
+      />}
 
 
 
@@ -127,7 +130,7 @@ export function App() {
       )}
 
       {/* Store Allocation Cards */}
-      {plan.storeAllocations.length > 0 ? (
+      {!tripContext.origin ? null : plan.storeAllocations.length > 0 ? (
         <div className="store-grid space-y-3">
           <div className="text-xs font-bold uppercase tracking-wider text-brand-darkgreen flex items-center justify-between">
             <span>Shopping to-do list ({plan.storeAllocations.length})</span>
@@ -158,6 +161,7 @@ export function App() {
       <TransportSelector mode={tripContext.transportMode} onChange={setTransportMode} />
       <TripContextPanel
         tripContext={tripContext}
+        location={location}
         onSetOrigin={setOrigin}
         onSetDestinationMode={setDestinationMode}
       />
